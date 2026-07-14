@@ -13,7 +13,7 @@ function opGroupMedia(items) {
 
 function opLoadProjects() {
   if (window.__opProjectsOverride) return Promise.resolve(window.__opProjectsOverride);
-  return fetch('data/projects.json').then(function(r) { return r.json(); });
+  return fetch('data/projects.json?v=' + Date.now()).then(function(r) { return r.json(); });
 }
 
 function opProjTile(p, index, total) {
