@@ -2,16 +2,16 @@
   {
     "slug": "p1",
     "n": "01",
-    "title": "Fjárhagsleg heilsa",
-    "kind": "Commercial campaign",
-    "client": "Íslandsbanki",
+    "title": "Commercial campaign",
+    "kind": "Íslandsbanki",
+    "client": "Fjárhagsleg heilsa",
     "services": "Commercial",
     "year": "2026",
     "description": "A brand film built around one long travel day — no interviews, no voiceover, just the gear doing what it's made for.",
     "media": [
       {
         "type": "image",
-        "src": "coastline.jpg"
+        "src": "ISB---Gulli-Arnars---HHH04556.webp"
       },
       {
         "type": "image",
