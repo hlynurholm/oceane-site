@@ -1,0 +1,335 @@
+/* ── Toolbar ─────────────────────────────────────────────────────────────────── */
+#op-edit-bar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 44px;
+  background: #141310;
+  border-bottom: 1px solid rgba(255,252,249,.12);
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 8px;
+  z-index: 99999;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  color: rgba(255,252,249,.55);
+  letter-spacing: .05em;
+}
+
+.op-edit-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  color: rgba(255,252,249,.35);
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
+.op-edit-sep { width: 1px; height: 20px; background: rgba(255,252,249,.12); flex-shrink: 0; }
+.op-edit-spacer { flex: 1; }
+
+.op-edit-btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .04em;
+  background: rgba(255,252,249,.08);
+  color: rgba(255,252,249,.75);
+  border: 1px solid rgba(255,252,249,.1);
+  border-radius: 6px;
+  padding: 5px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s, color .15s, opacity .15s;
+}
+.op-edit-btn:hover { background: rgba(255,252,249,.14); color: #fffcf9; }
+.op-edit-btn:disabled { opacity: .35; cursor: default; }
+
+.op-edit-btn-primary { background: #fffcf9; color: #141310; border-color: #fffcf9; }
+.op-edit-btn-primary:hover { background: #e8e4df; color: #141310; }
+
+.op-edit-btn-blue { background: #1b5294; color: #fffcf9; border-color: #1b5294; }
+.op-edit-btn-blue:hover { background: #154175; }
+
+.op-edit-btn-danger { color: rgba(255,100,100,.8); border-color: rgba(255,100,100,.2); }
+.op-edit-btn-danger:hover { background: rgba(255,100,100,.12); color: rgb(255,100,100); }
+
+.op-edit-toggle-active { background: #fffcf9; color: #141310; border-color: #fffcf9; }
+.op-edit-toggle-active:hover { background: #e8e4df; }
+
+/* ── Shift header down when bar is visible ──────────────────────────────────── */
+.op-header { top: 44px !important; }
+
+/* ── Editable text highlights ───────────────────────────────────────────────── */
+body.op-edit-mode [contenteditable] {
+  outline: none;
+  position: relative;
+  cursor: text;
+}
+body.op-edit-mode [contenteditable]:hover {
+  box-shadow: 0 0 0 2px rgba(27,82,148,.4);
+  border-radius: 3px;
+}
+body.op-edit-mode [contenteditable]:focus {
+  box-shadow: 0 0 0 2px #1b5294;
+  border-radius: 3px;
+}
+
+/* ── Image replace button ───────────────────────────────────────────────────── */
+.op-img-replace {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(20,19,16,.75);
+  backdrop-filter: blur(8px);
+  color: #fffcf9;
+  border: 1px solid rgba(255,252,249,.25);
+  border-radius: 999px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 9px 20px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .2s;
+  z-index: 10;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.op-img-replace:hover { background: rgba(27,82,148,.85); border-color: #1b5294; }
+
+body.op-edit-mode .op-proj:hover .op-img-replace,
+body.op-edit-mode .op-hero-media-img:hover .op-img-replace,
+body.op-edit-mode .op-d-images:hover .op-img-replace,
+body.op-edit-mode .op-d-video:hover .op-img-replace,
+body.op-edit-mode .op-d-images img:hover ~ .op-img-replace {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Make each image cell a relative container that shows its own replace button */
+body.op-edit-mode .op-d-images { position: relative; }
+body.op-edit-mode .op-d-images img { display: block; cursor: pointer; }
+body.op-edit-mode .op-img-cover-wrap {
+  position: relative;
+  display: contents;
+}
+body.op-edit-mode .op-img-replace-img {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(20,19,16,.75);
+  backdrop-filter: blur(8px);
+  color: #fffcf9;
+  border: 1px solid rgba(255,252,249,.25);
+  border-radius: 999px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 7px 16px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .2s;
+  z-index: 10;
+  white-space: nowrap;
+  pointer-events: none;
+}
+body.op-edit-mode .op-img-cell:hover .op-img-replace-img {
+  opacity: 1;
+  pointer-events: auto;
+}
+.op-img-cell { position: relative; }
+
+/* ── Video URL button ───────────────────────────────────────────────────────── */
+.op-video-url-btn {
+  top: auto !important;
+  left: auto !important;
+  transform: none !important;
+  bottom: 16px;
+  right: 16px;
+  opacity: 0;
+  pointer-events: none;
+  font-size: 11px;
+  padding: 5px 12px;
+}
+body.op-edit-mode .op-d-video:hover .op-video-url-btn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Remove media button ────────────────────────────────────────────────────── */
+.op-media-remove {
+  position: absolute;
+  top: 12px; right: 12px;
+  width: 28px; height: 28px;
+  background: rgba(20,19,16,.7);
+  backdrop-filter: blur(6px);
+  color: rgba(255,252,249,.8);
+  border: 1px solid rgba(255,252,249,.2);
+  border-radius: 50%;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .2s, background .15s;
+  z-index: 20;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+body.op-edit-mode .op-d-video:hover .op-media-remove,
+body.op-edit-mode .op-img-cell:hover .op-media-remove {
+  opacity: 1;
+  pointer-events: auto;
+}
+.op-media-remove:hover { background: rgba(200,50,50,.7); }
+
+/* ── Add media row ──────────────────────────────────────────────────────────── */
+.op-media-add-row {
+  display: flex;
+  gap: 10px;
+  padding: 8px 0 16px;
+}
+
+/* ── Edit project button on tiles ───────────────────────────────────────────── */
+.op-proj-edit-btn {
+  position: absolute;
+  bottom: 56px; right: 56px;
+  background: rgba(255,252,249,.92);
+  color: #141310;
+  border: none;
+  border-radius: 999px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 9px 20px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .2s;
+  z-index: 20;
+  pointer-events: none;
+}
+body.op-edit-mode .op-proj:hover .op-proj-edit-btn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Snapshots panel ────────────────────────────────────────────────────────── */
+.op-edit-snaps-wrap { position: relative; }
+.op-edit-snaps-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 260px;
+  background: #1e1c19;
+  border: 1px solid rgba(255,252,249,.12);
+  border-radius: 10px;
+  padding: 8px;
+  z-index: 99999;
+  max-height: 340px;
+  overflow-y: auto;
+}
+.op-edit-snaps-panel[hidden] { display: none; }
+.op-snap-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: rgba(255,252,249,.7);
+  gap: 12px;
+}
+.op-snap-item:hover { background: rgba(255,252,249,.06); }
+.op-snap-label { flex: 1; font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+.op-snap-restore {
+  font-size: 11px;
+  color: #89a7bb;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.op-snap-restore:hover { background: rgba(27,82,148,.3); color: #fffcf9; }
+.op-snaps-empty { padding: 12px 10px; font-size: 12px; color: rgba(255,252,249,.3); text-align: center; }
+
+/* ── Toast ──────────────────────────────────────────────────────────────────── */
+#op-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: #1e1c19;
+  border: 1px solid rgba(255,252,249,.15);
+  color: rgba(255,252,249,.9);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  z-index: 99999;
+  opacity: 0;
+  transition: opacity .2s, transform .2s;
+  pointer-events: none;
+}
+#op-toast.op-toast-show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── Dirty indicator ────────────────────────────────────────────────────────── */
+.op-edit-dirty-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #89a7bb;
+  display: inline-block;
+  margin-right: 2px;
+  vertical-align: middle;
+}
+
+/* ── Push modal ─────────────────────────────────────────────────────────────── */
+#op-push-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,9,7,.6);
+  backdrop-filter: blur(4px);
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#op-push-modal[hidden] { display: none; }
+.op-push-modal-box {
+  background: #1e1c19;
+  border: 1px solid rgba(255,252,249,.12);
+  border-radius: 16px;
+  padding: 28px 28px 24px;
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  font-family: 'DM Sans', sans-serif;
+}
+.op-push-modal-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fffcf9;
+  margin: 0 0 6px;
+}
+.op-push-modal-sub {
+  font-size: 13px;
+  color: rgba(255,252,249,.45);
+  margin: 0 0 18px;
+}
+.op-push-modal-input {
+  width: 100%;
+  background: rgba(255,252,249,.06);
+  border: 1px solid rgba(255,252,249,.12);
+  border-radius: 8px;
+  color: #fffcf9;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  padding: 10px 14px;
+  margin-bottom: 18px;
+  box-sizing: border-box;
+}
+.op-push-modal-input:focus { outline: none; border-color: #1b5294; }
+.op-push-modal-btns { display: flex; gap: 10px; justify-content: flex-end; }

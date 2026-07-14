@@ -1,15 +1,19 @@
 function opGroupMedia(items) {
-  var groups = [], buffer = [];
-  items.forEach(function(item){
-    if (item.type === 'image') buffer.push(item);
-    else { if (buffer.length) { groups.push({ kind: 'images', items: buffer }); buffer = []; } groups.push({ kind: 'video', item: item }); }
+  var groups = [], buffer = [], bufferIdxs = [];
+  items.forEach(function(item, i) {
+    if (item.type === 'image') { buffer.push(item); bufferIdxs.push(i); }
+    else {
+      if (buffer.length) { groups.push({ kind: 'images', items: buffer, idxs: bufferIdxs }); buffer = []; bufferIdxs = []; }
+      groups.push({ kind: 'video', item: item, idx: i });
+    }
   });
-  if (buffer.length) groups.push({ kind: 'images', items: buffer });
+  if (buffer.length) groups.push({ kind: 'images', items: buffer, idxs: bufferIdxs });
   return groups;
 }
 
 function opLoadProjects() {
-  return fetch('data/projects.json').then(function(r){ return r.json(); });
+  if (window.__opProjectsOverride) return Promise.resolve(window.__opProjectsOverride);
+  return fetch('data/projects.json').then(function(r) { return r.json(); });
 }
 
 function opProjTile(p, index) {
@@ -38,25 +42,30 @@ function opProjTile(p, index) {
 function opRenderHome() {
   var root = document.getElementById('op-projects');
   if (!root) return;
-  opLoadProjects().then(function(projects){
+  opLoadProjects().then(function(projects) {
     root.innerHTML = projects.map(opProjTile).join('');
   });
 }
 
-function opVideoBlockHtml(item) {
+function opVideoBlockHtml(item, idx) {
+  var idxAttr = idx !== undefined ? ' data-op-media-idx="' + idx + '"' : '';
+  var playEl = item.url
+    ? '<a class="op-d-play" href="' + item.url + '" target="_blank" rel="noopener"><img src="assets/icons/play.svg" alt="Play"></a>'
+    : '<div class="op-d-play"><img src="assets/icons/play.svg" alt=""></div>';
   return '' +
-    '<div class="op-d-video">' +
+    '<div class="op-d-video"' + idxAttr + '>' +
       '<div class="op-d-video-media" style="background-image:url(assets/photos/' + item.poster + ')"></div>' +
       '<div class="op-d-video-scrim"></div>' +
-      '<div class="op-d-play"><img src="assets/icons/play.svg" alt=""></div>' +
+      playEl +
     '</div>';
 }
 
-function opImagesBlockHtml(items) {
+function opImagesBlockHtml(items, idxs) {
   var cols = Math.min(items.length, 3);
-  var imgs = items.map(function(it){
+  var imgs = items.map(function(it, i) {
     var ratio = items.length === 1 ? '16/9' : '4/3';
-    return '<img src="assets/photos/' + it.src + '" alt="" style="aspect-ratio:' + ratio + '">';
+    var idx = idxs ? idxs[i] : i;
+    return '<div class="op-img-cell" data-op-media-idx="' + idx + '"><img src="assets/photos/' + it.src + '" alt="" style="aspect-ratio:' + ratio + '"></div>';
   }).join('');
   return '<div class="op-d-images" style="grid-template-columns:repeat(' + cols + ',1fr)">' + imgs + '</div>';
 }
@@ -64,20 +73,20 @@ function opImagesBlockHtml(items) {
 function opRenderDetail() {
   var root = document.getElementById('op-detail-root');
   if (!root) return;
-  opLoadProjects().then(function(projects){
-    var order = projects.map(function(p){ return p.slug; });
+  opLoadProjects().then(function(projects) {
+    var order = projects.map(function(p) { return p.slug; });
     var params = new URLSearchParams(window.location.search);
     var slug = order.indexOf(params.get('p')) >= 0 ? params.get('p') : order[0];
-    var proj = projects.filter(function(p){ return p.slug === slug; })[0];
+    var proj = projects.filter(function(p) { return p.slug === slug; })[0];
     var idx = order.indexOf(slug);
     var prev = projects[(idx - 1 + projects.length) % projects.length];
     var next = projects[(idx + 1) % projects.length];
     var groups = opGroupMedia(proj.media);
-    var galleryHtml = groups.map(function(g){
-      return g.kind === 'video' ? opVideoBlockHtml(g.item) : opImagesBlockHtml(g.items);
+    var galleryHtml = groups.map(function(g) {
+      return g.kind === 'video' ? opVideoBlockHtml(g.item, g.idx) : opImagesBlockHtml(g.items, g.idxs);
     }).join('');
 
-    document.title = 'Oceane Productions \u2014 ' + proj.title;
+    document.title = 'Oceane Productions — ' + proj.title;
 
     root.innerHTML = '' +
       '<div class="op-d-top">' +
@@ -85,13 +94,13 @@ function opRenderDetail() {
           '<a class="op-d-back" href="index.html">&larr; All projects</a>' +
           '<div class="op-d-n"><span class="op-d-n-dot"></span>' + proj.n + ' / 06</div>' +
         '</div>' +
-        '<div class="op-d-client">' + proj.client + '</div>' +
-        '<div class="op-d-title">' + proj.title + ' \u2014 ' + proj.kind + '</div>' +
+        '<div class="op-d-client" data-op-field="client">' + proj.client + '</div>' +
+        '<div class="op-d-title"><span data-op-field="title">' + proj.title + '</span> — <span data-op-field="kind">' + proj.kind + '</span></div>' +
         '<div class="op-d-meta-row">' +
-          '<div class="op-d-meta-item"><span class="op-d-meta-label">Services</span><span class="op-d-meta-value">' + proj.services + '</span></div>' +
-          '<div class="op-d-meta-item"><span class="op-d-meta-label">Year</span><span class="op-d-meta-value">' + proj.year + '</span></div>' +
+          '<div class="op-d-meta-item"><span class="op-d-meta-label">Services</span><span class="op-d-meta-value" data-op-field="services">' + proj.services + '</span></div>' +
+          '<div class="op-d-meta-item"><span class="op-d-meta-label">Year</span><span class="op-d-meta-value" data-op-field="year">' + proj.year + '</span></div>' +
         '</div>' +
-        '<div class="op-d-desc"><p>' + proj.description + '</p></div>' +
+        '<div class="op-d-desc"><p data-op-field="description">' + proj.description + '</p></div>' +
       '</div>' +
       (groups.length ? '<div class="op-d-gallery">' + galleryHtml + '</div>' : '') +
       '<div class="op-d-nav">' +
