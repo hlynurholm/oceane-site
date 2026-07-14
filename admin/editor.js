@@ -39,6 +39,79 @@ const resetBtn    = $('op-reset');
 const snapsBtn    = $('op-snaps-btn');
 const snapsPanel  = $('op-snaps-panel');
 
+// ── Focal point picker modal ──────────────────────────────────────────────────
+const focalModal = createModal(`
+  <p class="op-modal-title">Set focal point</p>
+  <p class="op-modal-sub">Click the most important part — it stays visible when the photo is cropped to fit.</p>
+  <div class="op-focal-wrap" id="fp-wrap">
+    <img id="fp-img" src="" alt="" draggable="false">
+    <div class="op-focal-dot" id="fp-dot" style="display:none"></div>
+    <div class="op-focal-crosshair-h" id="fp-ch" style="display:none"></div>
+    <div class="op-focal-crosshair-v" id="fp-cv" style="display:none"></div>
+  </div>
+  <div class="op-modal-btns" style="margin-top:16px">
+    <button class="op-edit-btn" id="fp-skip">Use center</button>
+    <button class="op-edit-btn op-edit-btn-primary" id="fp-confirm">Confirm focal point</button>
+  </div>
+`);
+focalModal.id = 'op-focal-modal';
+
+let _focalResolve = null;
+let _focalPoint = null;
+
+function pickFocalPoint(filename) {
+  return new Promise(resolve => {
+    _focalResolve = resolve;
+    _focalPoint = null;
+    const img  = $('fp-img');
+    const dot  = $('fp-dot');
+    const ch   = $('fp-ch');
+    const cv   = $('fp-cv');
+    img.src = 'assets/photos/' + filename;
+    dot.style.display = 'none';
+    ch.style.display  = 'none';
+    cv.style.display  = 'none';
+    focalModal.hidden = false;
+  });
+}
+
+$('fp-wrap').addEventListener('click', e => {
+  const wrap = $('fp-wrap');
+  const rect = wrap.getBoundingClientRect();
+  // Use the image's rendered bounds (may not fill wrap if object-fit:contain letterboxes)
+  const img   = $('fp-img');
+  const iRect = img.getBoundingClientRect();
+  if (e.clientX < iRect.left || e.clientX > iRect.right ||
+      e.clientY < iRect.top  || e.clientY > iRect.bottom) return;
+  const x = ((e.clientX - iRect.left) / iRect.width  * 100).toFixed(1);
+  const y = ((e.clientY - iRect.top)  / iRect.height * 100).toFixed(1);
+  _focalPoint = x + '% ' + y + '%';
+  // Position dot and crosshairs relative to wrap
+  const dot = $('fp-dot');
+  const ch  = $('fp-ch');
+  const cv  = $('fp-cv');
+  const rx = ((e.clientX - rect.left) / rect.width  * 100).toFixed(2);
+  const ry = ((e.clientY - rect.top)  / rect.height * 100).toFixed(2);
+  dot.style.left = rx + '%'; dot.style.top = ry + '%'; dot.style.display = 'block';
+  ch.style.top   = ry + '%';  ch.style.display  = 'block';
+  cv.style.left  = rx + '%';  cv.style.display  = 'block';
+});
+
+$('fp-skip').addEventListener('click', () => {
+  focalModal.hidden = true;
+  if (_focalResolve) { _focalResolve(null); _focalResolve = null; }
+});
+$('fp-confirm').addEventListener('click', () => {
+  focalModal.hidden = true;
+  if (_focalResolve) { _focalResolve(_focalPoint); _focalResolve = null; }
+});
+focalModal.addEventListener('click', e => {
+  if (e.target === focalModal) {
+    focalModal.hidden = true;
+    if (_focalResolve) { _focalResolve(null); _focalResolve = null; }
+  }
+});
+
 // ── Stream picker modal ───────────────────────────────────────────────────────
 const streamModal = createModal(`
   <p class="op-modal-title">Choose from Cloudflare Stream</p>
@@ -161,6 +234,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     pushModal.hidden = true; newProjModal.hidden = true; snapsPanel.hidden = true;
     if (!streamModal.hidden) { streamModal.hidden = true; if (_streamResolve) { _streamResolve(null); _streamResolve = null; } }
+    if (!focalModal.hidden)  { focalModal.hidden = true;  if (_focalResolve)  { _focalResolve(null);  _focalResolve  = null; } }
   }
 });
 
@@ -213,9 +287,13 @@ function setupHomeStaticEditing() {
     addReplaceBtn(heroMedia, async () => {
       const fn = await pickAndUpload('image/*');
       if (!fn) return;
+      const pos = await pickFocalPoint(fn);
+      const bgPos = pos || 'center';
       snapshot();
       heroBg.style.backgroundImage = `url(assets/photos/${fn})`;
-      setIndexAttr('.op-hero-media-img', 'style', `background-image:url(assets/photos/${fn})`);
+      heroBg.style.backgroundPosition = bgPos;
+      setIndexAttr('.op-hero-media-img', 'style',
+        `background-image:url(assets/photos/${fn});background-position:${bgPos}`);
       markDirty();
     });
   }
@@ -256,9 +334,10 @@ function setupHomeTileEditing() {
         if (action === 'cover-photo') {
           const fn = await pickAndUpload('image/*');
           if (!fn) return;
+          const pos = await pickFocalPoint(fn);
           snapshot();
           delete proj.coverStreamUid;
-          // update cover image in media array too
+          proj.bgPosition = pos || 'center';
           if (proj.media[0]) {
             if (proj.media[0].type === 'video') proj.media[0].poster = fn;
             else proj.media[0].src = fn;

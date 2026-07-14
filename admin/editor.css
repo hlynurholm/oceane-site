@@ -307,6 +307,43 @@ body.op-edit-mode .op-draggable.op-active .op-drag-tooltip { opacity: 1; }
 }
 #op-toast.op-toast-show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+/* ── Focal point picker ──────────────────────────────────────────────────────── */
+#op-focal-modal .op-modal-box { width: 680px; }
+.op-focal-wrap {
+  position: relative;
+  cursor: crosshair;
+  border-radius: 10px;
+  overflow: hidden;
+  line-height: 0;
+  user-select: none;
+}
+.op-focal-wrap img {
+  width: 100%;
+  max-height: 420px;
+  object-fit: contain;
+  display: block;
+  background: #0a0907;
+}
+.op-focal-dot {
+  position: absolute;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 3px solid #fffcf9;
+  background: rgba(27,82,148,.85);
+  box-shadow: 0 0 0 2px rgba(0,0,0,.35), 0 2px 8px rgba(0,0,0,.5);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: left .08s, top .08s;
+}
+.op-focal-crosshair-h,
+.op-focal-crosshair-v {
+  position: absolute;
+  background: rgba(255,252,249,.25);
+  pointer-events: none;
+}
+.op-focal-crosshair-h { left: 0; right: 0; height: 1px; transform: translateY(-50%); }
+.op-focal-crosshair-v { top: 0; bottom: 0; width: 1px; transform: translateX(-50%); }
+
 /* ── Stream video picker ─────────────────────────────────────────────────────── */
 .op-stream-grid {
   display: grid;

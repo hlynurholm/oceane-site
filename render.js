@@ -36,7 +36,10 @@ function opProjTile(p, index, total) {
     var cover = p.media && p.media.length
       ? (p.media[0].type === 'video' ? p.media[0].poster : p.media[0].src)
       : '';
-    var bgStyle = cover ? 'background-image:url(assets/photos/' + cover + ')' : 'background:#2a2824';
+    var bgPos  = p.bgPosition || 'center';
+    var bgStyle = cover
+      ? 'background-image:url(assets/photos/' + cover + ');background-position:' + bgPos
+      : 'background:#2a2824';
     mediaEl = '<div class="op-proj-media" style="' + bgStyle + '"></div>';
   }
 
