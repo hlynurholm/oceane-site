@@ -7,7 +7,7 @@
     "client": "Fjárhagsleg heilsa",
     "services": "Commercial",
     "year": "2026",
-    "description": "A brand film built around one long travel day — no interviews, no voiceover, just the gear doing what it's made for.",
+    "description": "Herferð framleidd fyrir Íslandsbanka með bakaranum Gulla Arnar",
     "media": [
       {
         "type": "image",
@@ -15,11 +15,17 @@
       },
       {
         "type": "image",
-        "src": "f1-track.jpg"
+        "src": "ISB---Gulli-Arnars---HHH04429.webp"
       },
       {
         "type": "image",
-        "src": "driver-portrait.jpg"
+        "src": "ISB---Gulli-Arnars---HHH03969.webp"
+      },
+      {
+        "type": "video",
+        "streamUid": "6582f77f0d2f6c482f13a09c01b66600",
+        "poster": "https://customer-glfted1bbx13jo4x.cloudflarestream.com/6582f77f0d2f6c482f13a09c01b66600/thumbnails/thumbnail.jpg",
+        "url": ""
       }
     ],
     "bgPosition": "58.2% 35.0%"
