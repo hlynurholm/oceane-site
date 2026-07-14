@@ -304,6 +304,35 @@ body.op-edit-mode .op-draggable.op-active .op-drag-tooltip { opacity: 1; }
 }
 #op-toast.op-toast-show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+/* ── Stream video picker ─────────────────────────────────────────────────────── */
+.op-stream-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+  max-height: 420px;
+  overflow-y: auto;
+}
+.op-stream-card {
+  cursor: pointer;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  transition: border-color .15s, transform .1s;
+  background: rgba(255,252,249,.05);
+}
+.op-stream-card:hover { border-color: #1b5294; transform: scale(1.02); }
+.op-stream-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
+.op-stream-card span {
+  display: block;
+  font-size: 11px;
+  color: rgba(255,252,249,.6);
+  padding: 5px 7px 7px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: 'DM Sans', sans-serif;
+}
+
 /* ── Generic modal backdrop ──────────────────────────────────────────────────── */
 .op-modal {
   position: fixed; inset: 0;
@@ -324,6 +353,8 @@ body.op-edit-mode .op-draggable.op-active .op-drag-tooltip { opacity: 1; }
   overflow-y: auto;
   font-family: 'DM Sans', sans-serif;
 }
+/* Stream modal needs more width for the grid */
+#op-stream-modal .op-modal-box { width: 700px; }
 .op-modal-title { font-size: 17px; font-weight: 600; color: #fffcf9; margin: 0 0 4px; }
 .op-modal-sub { font-size: 13px; color: rgba(255,252,249,.4); margin: 0 0 22px; }
 .op-modal-row { margin-bottom: 14px; }

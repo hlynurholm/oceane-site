@@ -113,6 +113,38 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
   }
 });
 
+// ── Cloudflare Stream ─────────────────────────────────────────────────────────
+
+function getCfConfig() {
+  const cfPath = path.join(__dirname, 'cf-config.json');
+  if (!fs.existsSync(cfPath)) return null;
+  try {
+    const cfg = JSON.parse(fs.readFileSync(cfPath, 'utf8'));
+    if (!cfg.accountId || cfg.accountId === 'YOUR_ACCOUNT_ID_HERE') return null;
+    return cfg;
+  } catch { return null; }
+}
+
+app.get('/api/stream-videos', async (req, res) => {
+  const cfg = getCfConfig();
+  if (!cfg) return res.json({ configured: false, videos: [] });
+  try {
+    const r = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${cfg.accountId}/stream?limit=50`,
+      { headers: { Authorization: `Bearer ${cfg.apiToken}` } }
+    );
+    const data = await r.json();
+    if (!data.success) return res.status(502).json({ error: data.errors?.[0]?.message || 'CF error' });
+    const videos = (data.result || []).map(v => ({
+      uid:       v.uid,
+      name:      v.meta?.name || v.uid,
+      thumbnail: v.thumbnail,
+      duration:  v.duration,
+    }));
+    res.json({ configured: true, videos });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.get('/api/snapshots', (req, res) => {
   const list = fs.readdirSync(SNAPS)
     .filter(f => fs.statSync(path.join(SNAPS, f)).isDirectory())

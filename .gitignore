@@ -2,3 +2,4 @@
 assets/.DS_Store
 .snapshots/
 admin/node_modules/
+admin/cf-config.json

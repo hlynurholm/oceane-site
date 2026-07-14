@@ -55,12 +55,22 @@ function opRenderHome() {
 
 function opVideoBlockHtml(item, idx) {
   var idxAttr = idx !== undefined ? ' data-op-media-idx="' + idx + '"' : '';
+  // Cloudflare Stream: embed as an autoplay/muted/loop iframe
+  if (item.streamUid) {
+    var src = 'https://iframe.videodelivery.net/' + item.streamUid +
+              '?autoplay=true&muted=true&loop=true&controls=false&preload=auto';
+    return '' +
+      '<div class="op-d-video op-d-stream"' + idxAttr + '>' +
+        '<iframe src="' + src + '" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="border:none;width:100%;height:100%;position:absolute;inset:0"></iframe>' +
+      '</div>';
+  }
+  // Fallback: static poster + play button
   var playEl = item.url
     ? '<a class="op-d-play" href="' + item.url + '" target="_blank" rel="noopener"><img src="assets/icons/play.svg" alt="Play"></a>'
     : '<div class="op-d-play"><img src="assets/icons/play.svg" alt=""></div>';
   return '' +
     '<div class="op-d-video"' + idxAttr + '>' +
-      '<div class="op-d-video-media" style="background-image:url(assets/photos/' + item.poster + ')"></div>' +
+      '<div class="op-d-video-media" style="background-image:url(assets/photos/' + (item.poster || '') + ')"></div>' +
       '<div class="op-d-video-scrim"></div>' +
       playEl +
     '</div>';

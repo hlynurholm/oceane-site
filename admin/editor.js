@@ -39,6 +39,17 @@ const resetBtn    = $('op-reset');
 const snapsBtn    = $('op-snaps-btn');
 const snapsPanel  = $('op-snaps-panel');
 
+// ── Stream picker modal ───────────────────────────────────────────────────────
+const streamModal = createModal(`
+  <p class="op-modal-title">Choose from Cloudflare Stream</p>
+  <p class="op-modal-sub" id="stream-sub">Loading your video library…</p>
+  <div id="stream-grid" class="op-stream-grid"></div>
+  <div class="op-modal-btns" style="margin-top:16px">
+    <button class="op-edit-btn" id="stream-cancel">Cancel</button>
+  </div>
+`);
+streamModal.id = 'op-stream-modal';
+
 // ── Push modal ────────────────────────────────────────────────────────────────
 const pushModal = createModal(`
   <p class="op-modal-title">Push to GitHub</p>
@@ -136,12 +147,21 @@ document.addEventListener('click', e => {
 [pushModal, newProjModal].forEach(m => {
   m.addEventListener('click', e => { if (e.target === m) m.hidden = true; });
 });
+streamModal.addEventListener('click', e => {
+  if (e.target === streamModal) {
+    streamModal.hidden = true;
+    if (_streamResolve) { _streamResolve(null); _streamResolve = null; }
+  }
+});
 
 // Keyboard shortcuts
 document.addEventListener('keydown', e => {
   if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
   if ((e.metaKey || e.ctrlKey) && e.key === 's') { e.preventDefault(); save(); }
-  if (e.key === 'Escape') { pushModal.hidden = true; newProjModal.hidden = true; snapsPanel.hidden = true; }
+  if (e.key === 'Escape') {
+    pushModal.hidden = true; newProjModal.hidden = true; snapsPanel.hidden = true;
+    if (!streamModal.hidden) { streamModal.hidden = true; if (_streamResolve) { _streamResolve(null); _streamResolve = null; } }
+  }
 });
 
 window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
@@ -293,8 +313,12 @@ function attachProjectEditing() {
       });
       const rm = makeRemoveBtn(() => removeMedia(proj, idx));
       el.appendChild(rm);
+    } else if (item.streamUid) {
+      // Stream video — el is .op-d-stream; just allow removal
+      const rm = makeRemoveBtn(() => removeMedia(proj, idx));
+      el.appendChild(rm);
     } else {
-      // el is .op-d-video (position:relative)
+      // el is .op-d-video (position:relative) — poster + URL video
       const bg = el.querySelector('.op-d-video-media');
       addReplaceBtn(el, async () => {
         const fn = await pickAndUpload('image/*');
@@ -347,10 +371,10 @@ function attachProjectEditing() {
   addVideo.className = 'op-edit-btn';
   addVideo.textContent = '+ Add video';
   addVideo.onclick = async () => {
-    const fn = await pickAndUpload('image/*');
-    if (!fn) return;
+    const v = await pickFromStream();
+    if (!v) return;
     snapshot();
-    proj.media.push({ type: 'video', poster: fn, url: '' });
+    proj.media.push({ type: 'video', streamUid: v.uid, poster: v.thumbnail || '', url: '' });
     markDirty();
     reRenderProject(proj);
   };
@@ -646,6 +670,8 @@ function makeRemoveBtn(onClick) {
 }
 
 function addVideoUrlBtn(el, item) {
+  // Only shown for non-Stream videos (poster+url style)
+  if (item.streamUid) return;
   const btn = document.createElement('button');
   btn.className = 'op-img-replace op-video-url-btn';
   btn.textContent = item.url ? 'Edit video URL' : '+ Video URL';
@@ -660,6 +686,52 @@ function addVideoUrlBtn(el, item) {
   });
   el.appendChild(btn);
 }
+
+// Open Stream picker and resolve with selected video object (or null)
+let _streamResolve = null;
+function pickFromStream() {
+  return new Promise(resolve => {
+    _streamResolve = resolve;
+    const sub  = $('stream-sub');
+    const grid = $('stream-grid');
+    sub.textContent  = 'Loading your video library…';
+    grid.innerHTML   = '';
+    streamModal.hidden = false;
+
+    fetch('/api/stream-videos').then(r => r.json()).then(data => {
+      if (!data.configured) {
+        sub.textContent = 'Cloudflare credentials not configured in admin/cf-config.json.';
+        return;
+      }
+      if (!data.videos.length) {
+        sub.textContent = 'No videos found in your Stream account. Upload some at dash.cloudflare.com → Stream.';
+        return;
+      }
+      sub.textContent = `${data.videos.length} video${data.videos.length !== 1 ? 's' : ''} in your library — click one to add it.`;
+      data.videos.forEach(v => {
+        const card = document.createElement('div');
+        card.className = 'op-stream-card';
+        card.innerHTML = `
+          <img src="${v.thumbnail || ''}" alt="${v.name}" onerror="this.style.display='none'">
+          <span>${v.name}</span>
+        `;
+        card.addEventListener('click', () => {
+          streamModal.hidden = true;
+          if (_streamResolve) { _streamResolve(v); _streamResolve = null; }
+        });
+        grid.appendChild(card);
+      });
+    }).catch(e => {
+      sub.textContent = 'Error: ' + e.message;
+    });
+  });
+}
+
+// Cancel stream picker
+$('stream-cancel').addEventListener('click', () => {
+  streamModal.hidden = true;
+  if (_streamResolve) { _streamResolve(null); _streamResolve = null; }
+});
 
 async function pickAndUpload(accept) {
   return new Promise(resolve => {
