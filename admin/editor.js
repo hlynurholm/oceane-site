@@ -271,6 +271,10 @@ function exitEditMode() {
   document.querySelectorAll('.op-draggable').forEach(el => {
     el.classList.remove('op-draggable', 'op-active', 'op-dragging');
   });
+  document.querySelectorAll('.op-media-draggable').forEach(el => {
+    el.draggable = false;
+    el.classList.remove('op-media-draggable', 'op-media-dragging', 'op-media-drag-over');
+  });
 }
 
 // ── Homepage: static text (hero, footer) ─────────────────────────────────────
@@ -467,6 +471,54 @@ function attachProjectEditing() {
   row.appendChild(addPhoto);
   row.appendChild(addVideo);
   gallery.appendChild(row);
+
+  setupMediaDrag(proj);
+}
+
+function setupMediaDrag(proj) {
+  let dragSrc = null;
+
+  document.querySelectorAll('[data-op-media-idx]').forEach(el => {
+    el.draggable = true;
+    el.classList.add('op-media-draggable');
+
+    el.addEventListener('dragstart', e => {
+      dragSrc = parseInt(el.dataset.opMediaIdx);
+      e.dataTransfer.effectAllowed = 'move';
+      setTimeout(() => el.classList.add('op-media-dragging'), 0);
+    });
+
+    el.addEventListener('dragend', () => {
+      el.classList.remove('op-media-dragging');
+      document.querySelectorAll('.op-media-drag-over').forEach(t => t.classList.remove('op-media-drag-over'));
+    });
+
+    el.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      const targetIdx = parseInt(el.dataset.opMediaIdx);
+      if (targetIdx === dragSrc) return;
+      document.querySelectorAll('.op-media-drag-over').forEach(t => t.classList.remove('op-media-drag-over'));
+      el.classList.add('op-media-drag-over');
+    });
+
+    el.addEventListener('dragleave', e => {
+      if (!el.contains(e.relatedTarget)) el.classList.remove('op-media-drag-over');
+    });
+
+    el.addEventListener('drop', e => {
+      e.preventDefault();
+      const targetIdx = parseInt(el.dataset.opMediaIdx);
+      el.classList.remove('op-media-drag-over');
+      if (dragSrc === null || dragSrc === targetIdx) return;
+      snapshot();
+      const [item] = proj.media.splice(dragSrc, 1);
+      proj.media.splice(targetIdx, 0, item);
+      dragSrc = null;
+      markDirty();
+      reRenderProject(proj);
+    });
+  });
 }
 
 function removeMedia(proj, idx) {

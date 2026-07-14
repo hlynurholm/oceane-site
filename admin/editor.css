@@ -131,6 +131,45 @@ body.op-edit-mode [contenteditable]:focus {
 .op-img-cell { position: relative; }
 .op-d-images .op-img-cell img { width: 100%; height: 100%; object-fit: cover; border-radius: 24px; display: block; }
 
+/* ── Media drag & reorder ───────────────────────────────────────────────────── */
+
+/* Disable pointer events on Stream iframes in edit mode so drag starts on parent */
+body.op-edit-mode .op-d-stream iframe { pointer-events: none; }
+
+/* Grab cursor on all draggable media items */
+body.op-edit-mode [data-op-media-idx] { cursor: grab; }
+body.op-edit-mode [data-op-media-idx]:active { cursor: grabbing; }
+
+/* Being dragged: fade out */
+.op-media-dragging { opacity: 0.3 !important; }
+
+/* Drop target highlight */
+.op-media-drag-over {
+  outline: 3px solid #1b5294;
+  outline-offset: 4px;
+  border-radius: 22px;
+}
+
+/* Drag handle badge — top-left corner, fades in on hover */
+body.op-edit-mode [data-op-media-idx]::before {
+  content: '⠿';
+  position: absolute;
+  top: 12px; left: 12px;
+  background: rgba(20,19,16,.75);
+  backdrop-filter: blur(6px);
+  color: rgba(255,252,249,.75);
+  font-size: 13px;
+  line-height: 1;
+  padding: 5px 7px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,252,249,.15);
+  opacity: 0;
+  transition: opacity .2s;
+  pointer-events: none;
+  z-index: 29;
+}
+body.op-edit-mode [data-op-media-idx]:hover::before { opacity: 1; }
+
 /* ── Remove media button ────────────────────────────────────────────────────── */
 .op-media-remove {
   position: absolute;
