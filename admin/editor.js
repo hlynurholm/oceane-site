@@ -441,6 +441,7 @@ function attachProjectEditing() {
     gallery.appendChild(empty);
   }
 
+  // Add row sits just before op-d-nav so it's always visible regardless of gallery length
   const row = document.createElement('div');
   row.className = 'op-media-add-row';
 
@@ -457,7 +458,7 @@ function attachProjectEditing() {
   };
 
   const addVideo = document.createElement('button');
-  addVideo.className = 'op-edit-btn';
+  addVideo.className = 'op-edit-btn op-edit-btn-blue';
   addVideo.textContent = '+ Add video';
   addVideo.onclick = async () => {
     const v = await pickFromStream();
@@ -470,7 +471,12 @@ function attachProjectEditing() {
 
   row.appendChild(addPhoto);
   row.appendChild(addVideo);
-  gallery.appendChild(row);
+
+  // Insert just before the prev/next nav, not inside gallery
+  const nav = document.querySelector('.op-d-nav');
+  const root = document.getElementById('op-detail-root');
+  if (nav) root.insertBefore(row, nav);
+  else root.appendChild(row);
 
   setupMediaDrag(proj);
 }

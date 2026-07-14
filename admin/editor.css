@@ -194,7 +194,14 @@ body.op-edit-mode .op-img-cell:hover .op-media-remove { opacity: 1; pointer-even
 .op-media-remove:hover { background: rgba(180,40,40,.75); }
 
 /* ── Add media row ──────────────────────────────────────────────────────────── */
-.op-media-add-row { display: flex; gap: 10px; padding: 16px 0 24px; }
+.op-media-add-row {
+  display: flex;
+  gap: 10px;
+  padding: 20px clamp(20px,4vw,56px) 28px;
+  border-top: 1px solid rgba(255,252,249,.1);
+  background: rgba(20,19,16,.6);
+  backdrop-filter: blur(8px);
+}
 
 /* ── Empty media state ──────────────────────────────────────────────────────── */
 .op-media-empty {
