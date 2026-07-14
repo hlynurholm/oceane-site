@@ -296,40 +296,54 @@ function attachProjectEditing() {
     }
   });
 
-  // Add media buttons
-  const gallery = document.querySelector('.op-d-gallery');
-  if (gallery) {
-    const row = document.createElement('div');
-    row.className = 'op-media-add-row';
+  // Add media buttons — always shown in edit mode, even when project has no media yet
+  let gallery = document.querySelector('.op-d-gallery');
+  if (!gallery) {
+    // Project has no media yet — create the gallery container and insert it
+    gallery = document.createElement('div');
+    gallery.className = 'op-d-gallery';
+    const nav = document.querySelector('.op-d-nav');
+    const root = document.getElementById('op-detail-root');
+    if (nav) root.insertBefore(gallery, nav);
+    else root.appendChild(gallery);
 
-    const addPhoto = document.createElement('button');
-    addPhoto.className = 'op-edit-btn';
-    addPhoto.textContent = '+ Add photo';
-    addPhoto.onclick = async () => {
-      const fn = await pickAndUpload('image/*');
-      if (!fn) return;
-      snapshot();
-      proj.media.push({ type: 'image', src: fn });
-      markDirty();
-      reRenderProject(proj);
-    };
-
-    const addVideo = document.createElement('button');
-    addVideo.className = 'op-edit-btn';
-    addVideo.textContent = '+ Add video';
-    addVideo.onclick = async () => {
-      const fn = await pickAndUpload('image/*');
-      if (!fn) return;
-      snapshot();
-      proj.media.push({ type: 'video', poster: fn, url: '' });
-      markDirty();
-      reRenderProject(proj);
-    };
-
-    row.appendChild(addPhoto);
-    row.appendChild(addVideo);
-    gallery.appendChild(row);
+    // Empty state hint
+    const empty = document.createElement('div');
+    empty.className = 'op-media-empty';
+    empty.textContent = 'No photos or video yet — add some below.';
+    gallery.appendChild(empty);
   }
+
+  const row = document.createElement('div');
+  row.className = 'op-media-add-row';
+
+  const addPhoto = document.createElement('button');
+  addPhoto.className = 'op-edit-btn op-edit-btn-primary';
+  addPhoto.textContent = '+ Add photo';
+  addPhoto.onclick = async () => {
+    const fn = await pickAndUpload('image/*');
+    if (!fn) return;
+    snapshot();
+    proj.media.push({ type: 'image', src: fn });
+    markDirty();
+    reRenderProject(proj);
+  };
+
+  const addVideo = document.createElement('button');
+  addVideo.className = 'op-edit-btn';
+  addVideo.textContent = '+ Add video';
+  addVideo.onclick = async () => {
+    const fn = await pickAndUpload('image/*');
+    if (!fn) return;
+    snapshot();
+    proj.media.push({ type: 'video', poster: fn, url: '' });
+    markDirty();
+    reRenderProject(proj);
+  };
+
+  row.appendChild(addPhoto);
+  row.appendChild(addVideo);
+  gallery.appendChild(row);
 }
 
 function removeMedia(proj, idx) {

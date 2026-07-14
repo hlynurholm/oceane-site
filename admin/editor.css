@@ -158,7 +158,16 @@ body.op-edit-mode .op-img-cell:hover .op-media-remove { opacity: 1; pointer-even
 .op-media-remove:hover { background: rgba(180,40,40,.75); }
 
 /* ── Add media row ──────────────────────────────────────────────────────────── */
-.op-media-add-row { display: flex; gap: 10px; padding: 8px 0 24px; }
+.op-media-add-row { display: flex; gap: 10px; padding: 16px 0 24px; }
+
+/* ── Empty media state ──────────────────────────────────────────────────────── */
+.op-media-empty {
+  padding: 40px 0 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: #9c927c;
+  font-style: italic;
+}
 
 /* ── Project tile controls (in edit mode) ───────────────────────────────────── */
 .op-tile-controls {
