@@ -16,6 +16,12 @@
   letter-spacing: .05em;
 }
 
+/* Push ALL page content below the toolbar */
+body { padding-top: 44px !important; }
+
+/* Keep the site header below the editor bar */
+.op-header { top: 44px !important; }
+
 .op-edit-label {
   font-size: 11px;
   font-weight: 600;
@@ -24,7 +30,6 @@
   margin-right: 4px;
   white-space: nowrap;
 }
-
 .op-edit-sep { width: 1px; height: 20px; background: rgba(255,252,249,.12); flex-shrink: 0; }
 .op-edit-spacer { flex: 1; }
 
@@ -48,178 +53,149 @@
 .op-edit-btn-primary { background: #fffcf9; color: #141310; border-color: #fffcf9; }
 .op-edit-btn-primary:hover { background: #e8e4df; color: #141310; }
 
+.op-edit-btn-green { background: #1a6640; color: #fffcf9; border-color: #1a6640; }
+.op-edit-btn-green:hover { background: #144f31; }
+
 .op-edit-btn-blue { background: #1b5294; color: #fffcf9; border-color: #1b5294; }
 .op-edit-btn-blue:hover { background: #154175; }
 
 .op-edit-btn-danger { color: rgba(255,100,100,.8); border-color: rgba(255,100,100,.2); }
 .op-edit-btn-danger:hover { background: rgba(255,100,100,.12); color: rgb(255,100,100); }
 
-.op-edit-toggle-active { background: #fffcf9; color: #141310; border-color: #fffcf9; }
-.op-edit-toggle-active:hover { background: #e8e4df; }
+.op-edit-toggle-active { background: rgba(255,252,249,.15); color: #fffcf9; border-color: rgba(255,252,249,.25); }
 
-/* ── Shift header down when bar is visible ──────────────────────────────────── */
-.op-header { top: 44px !important; }
+/* New project button — only shown when in edit mode */
+#op-new-project { display: none; }
+body.op-edit-mode #op-new-project { display: inline-flex; }
 
-/* ── Editable text highlights ───────────────────────────────────────────────── */
-body.op-edit-mode [contenteditable] {
-  outline: none;
-  position: relative;
-  cursor: text;
-}
-body.op-edit-mode [contenteditable]:hover {
-  box-shadow: 0 0 0 2px rgba(27,82,148,.4);
-  border-radius: 3px;
-}
-body.op-edit-mode [contenteditable]:focus {
-  box-shadow: 0 0 0 2px #1b5294;
-  border-radius: 3px;
-}
-
-/* ── Image replace button ───────────────────────────────────────────────────── */
+/* ── Replace photo buttons ───────────────────────────────────────────────────── */
+/*
+  These buttons are appended to positioned CONTAINERS (not to the bg-image divs).
+  The container is already position:relative or position:absolute, so we never
+  override any element's position property.
+*/
 .op-img-replace {
   position: absolute;
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  background: rgba(20,19,16,.75);
+  background: rgba(20,19,16,.78);
   backdrop-filter: blur(8px);
   color: #fffcf9;
-  border: 1px solid rgba(255,252,249,.25);
+  border: 1px solid rgba(255,252,249,.3);
   border-radius: 999px;
   font-family: 'DM Sans', sans-serif;
   font-size: 13px;
   font-weight: 500;
-  padding: 9px 20px;
+  padding: 10px 22px;
   cursor: pointer;
   opacity: 0;
-  transition: opacity .2s;
-  z-index: 10;
   pointer-events: none;
+  transition: opacity .2s, background .15s;
+  z-index: 30;
   white-space: nowrap;
 }
 .op-img-replace:hover { background: rgba(27,82,148,.85); border-color: #1b5294; }
 
-body.op-edit-mode .op-proj:hover .op-img-replace,
-body.op-edit-mode .op-hero-media-img:hover .op-img-replace,
-body.op-edit-mode .op-d-images:hover .op-img-replace,
-body.op-edit-mode .op-d-video:hover .op-img-replace,
-body.op-edit-mode .op-d-images img:hover ~ .op-img-replace {
+/* Show replace button on hover of its container */
+body.op-edit-mode .op-hero-media:hover > .op-img-replace,
+body.op-edit-mode .op-proj:hover > .op-img-replace,
+body.op-edit-mode .op-d-video:hover > .op-img-replace,
+body.op-edit-mode .op-img-cell:hover > .op-img-replace {
   opacity: 1;
   pointer-events: auto;
 }
 
-/* Make each image cell a relative container that shows its own replace button */
-body.op-edit-mode .op-d-images { position: relative; }
-body.op-edit-mode .op-d-images img { display: block; cursor: pointer; }
-body.op-edit-mode .op-img-cover-wrap {
-  position: relative;
-  display: contents;
+/* ── Editable text highlights ───────────────────────────────────────────────── */
+body.op-edit-mode [contenteditable] {
+  outline: none;
+  cursor: text;
+  border-radius: 3px;
+  transition: box-shadow .15s;
 }
-body.op-edit-mode .op-img-replace-img {
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(20,19,16,.75);
-  backdrop-filter: blur(8px);
-  color: #fffcf9;
-  border: 1px solid rgba(255,252,249,.25);
-  border-radius: 999px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
-  font-weight: 500;
-  padding: 7px 16px;
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity .2s;
-  z-index: 10;
-  white-space: nowrap;
-  pointer-events: none;
+body.op-edit-mode [contenteditable]:hover {
+  box-shadow: 0 0 0 2px rgba(27,82,148,.4);
 }
-body.op-edit-mode .op-img-cell:hover .op-img-replace-img {
-  opacity: 1;
-  pointer-events: auto;
+body.op-edit-mode [contenteditable]:focus {
+  box-shadow: 0 0 0 2px #1b5294;
 }
-.op-img-cell { position: relative; }
 
 /* ── Video URL button ───────────────────────────────────────────────────────── */
 .op-video-url-btn {
   top: auto !important;
   left: auto !important;
   transform: none !important;
-  bottom: 16px;
-  right: 16px;
-  opacity: 0;
-  pointer-events: none;
+  bottom: 14px;
+  right: 14px;
   font-size: 11px;
-  padding: 5px 12px;
+  padding: 6px 14px;
 }
-body.op-edit-mode .op-d-video:hover .op-video-url-btn {
-  opacity: 1;
-  pointer-events: auto;
-}
+
+/* ── Gallery image cells ────────────────────────────────────────────────────── */
+.op-img-cell { position: relative; }
+.op-d-images .op-img-cell img { width: 100%; height: 100%; object-fit: cover; border-radius: 24px; display: block; }
 
 /* ── Remove media button ────────────────────────────────────────────────────── */
 .op-media-remove {
   position: absolute;
   top: 12px; right: 12px;
-  width: 28px; height: 28px;
-  background: rgba(20,19,16,.7);
+  width: 30px; height: 30px;
+  background: rgba(20,19,16,.72);
   backdrop-filter: blur(6px);
-  color: rgba(255,252,249,.8);
+  color: rgba(255,252,249,.85);
   border: 1px solid rgba(255,252,249,.2);
   border-radius: 50%;
-  font-size: 13px;
-  line-height: 1;
+  font-size: 14px;
   cursor: pointer;
   opacity: 0;
-  transition: opacity .2s, background .15s;
-  z-index: 20;
-  display: flex; align-items: center; justify-content: center;
   pointer-events: none;
+  transition: opacity .2s, background .15s;
+  z-index: 30;
+  display: flex; align-items: center; justify-content: center;
+  line-height: 1;
 }
 body.op-edit-mode .op-d-video:hover .op-media-remove,
-body.op-edit-mode .op-img-cell:hover .op-media-remove {
-  opacity: 1;
-  pointer-events: auto;
-}
-.op-media-remove:hover { background: rgba(200,50,50,.7); }
+body.op-edit-mode .op-img-cell:hover .op-media-remove { opacity: 1; pointer-events: auto; }
+.op-media-remove:hover { background: rgba(180,40,40,.75); }
 
 /* ── Add media row ──────────────────────────────────────────────────────────── */
-.op-media-add-row {
-  display: flex;
-  gap: 10px;
-  padding: 8px 0 16px;
-}
+.op-media-add-row { display: flex; gap: 10px; padding: 8px 0 24px; }
 
-/* ── Edit project button on tiles ───────────────────────────────────────────── */
-.op-proj-edit-btn {
+/* ── Project tile controls (in edit mode) ───────────────────────────────────── */
+.op-tile-controls {
   position: absolute;
-  bottom: 56px; right: 56px;
-  background: rgba(255,252,249,.92);
-  color: #141310;
-  border: none;
-  border-radius: 999px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 9px 20px;
-  cursor: pointer;
+  top: 14px; right: 14px;
+  display: flex;
+  gap: 6px;
   opacity: 0;
-  transition: opacity .2s;
-  z-index: 20;
   pointer-events: none;
+  transition: opacity .2s;
+  z-index: 30;
 }
-body.op-edit-mode .op-proj:hover .op-proj-edit-btn {
-  opacity: 1;
-  pointer-events: auto;
+body.op-edit-mode .op-proj:hover .op-tile-controls { opacity: 1; pointer-events: auto; }
+
+.op-tile-btn {
+  background: rgba(20,19,16,.75);
+  backdrop-filter: blur(6px);
+  color: rgba(255,252,249,.85);
+  border: 1px solid rgba(255,252,249,.2);
+  border-radius: 6px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background .15s;
+  white-space: nowrap;
 }
+.op-tile-btn:hover { background: rgba(27,82,148,.75); border-color: #1b5294; }
+.op-tile-btn-danger:hover { background: rgba(180,40,40,.75); border-color: rgba(255,100,100,.5); }
 
 /* ── Snapshots panel ────────────────────────────────────────────────────────── */
 .op-edit-snaps-wrap { position: relative; }
 .op-edit-snaps-panel {
   position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  min-width: 260px;
+  top: calc(100% + 6px); right: 0;
+  min-width: 270px;
   background: #1e1c19;
   border: 1px solid rgba(255,252,249,.12);
   border-radius: 10px;
@@ -230,97 +206,69 @@ body.op-edit-mode .op-proj:hover .op-proj-edit-btn {
 }
 .op-edit-snaps-panel[hidden] { display: none; }
 .op-snap-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 10px;
-  border-radius: 6px;
-  font-size: 12px;
-  color: rgba(255,252,249,.7);
-  gap: 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 10px; border-radius: 6px;
+  font-size: 12px; color: rgba(255,252,249,.7); gap: 12px;
 }
 .op-snap-item:hover { background: rgba(255,252,249,.06); }
-.op-snap-label { flex: 1; font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+.op-snap-label { flex: 1; font-variant-numeric: tabular-nums; }
 .op-snap-restore {
-  font-size: 11px;
-  color: #89a7bb;
-  background: none;
-  border: none;
-  cursor: pointer;
+  font-size: 11px; color: #89a7bb;
+  background: none; border: none; cursor: pointer;
   font-family: 'DM Sans', sans-serif;
-  padding: 2px 6px;
-  border-radius: 4px;
+  padding: 2px 8px; border-radius: 4px;
 }
 .op-snap-restore:hover { background: rgba(27,82,148,.3); color: #fffcf9; }
-.op-snaps-empty { padding: 12px 10px; font-size: 12px; color: rgba(255,252,249,.3); text-align: center; }
+.op-snaps-empty { padding: 14px 10px; font-size: 12px; color: rgba(255,252,249,.3); text-align: center; }
 
 /* ── Toast ──────────────────────────────────────────────────────────────────── */
 #op-toast {
   position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%) translateY(8px);
+  bottom: 28px; left: 50%;
+  transform: translateX(-50%) translateY(10px);
   background: #1e1c19;
   border: 1px solid rgba(255,252,249,.15);
   color: rgba(255,252,249,.9);
   font-family: 'DM Sans', sans-serif;
   font-size: 13px;
-  padding: 10px 20px;
+  padding: 10px 22px;
   border-radius: 999px;
   z-index: 99999;
   opacity: 0;
   transition: opacity .2s, transform .2s;
   pointer-events: none;
 }
-#op-toast.op-toast-show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
+#op-toast.op-toast-show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* ── Dirty indicator ────────────────────────────────────────────────────────── */
-.op-edit-dirty-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: #89a7bb;
-  display: inline-block;
-  margin-right: 2px;
-  vertical-align: middle;
-}
-
-/* ── Push modal ─────────────────────────────────────────────────────────────── */
-#op-push-modal {
-  position: fixed;
-  inset: 0;
+/* ── Generic modal backdrop ──────────────────────────────────────────────────── */
+.op-modal {
+  position: fixed; inset: 0;
   background: rgba(10,9,7,.6);
   backdrop-filter: blur(4px);
   z-index: 999999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
 }
-#op-push-modal[hidden] { display: none; }
-.op-push-modal-box {
+.op-modal[hidden] { display: none; }
+.op-modal-box {
   background: #1e1c19;
   border: 1px solid rgba(255,252,249,.12);
   border-radius: 16px;
-  padding: 28px 28px 24px;
-  width: 420px;
+  padding: 28px;
+  width: 460px;
   max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
   font-family: 'DM Sans', sans-serif;
 }
-.op-push-modal-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #fffcf9;
-  margin: 0 0 6px;
+.op-modal-title { font-size: 17px; font-weight: 600; color: #fffcf9; margin: 0 0 4px; }
+.op-modal-sub { font-size: 13px; color: rgba(255,252,249,.4); margin: 0 0 22px; }
+.op-modal-row { margin-bottom: 14px; }
+.op-modal-label {
+  display: block; font-size: 11px; letter-spacing: .07em; text-transform: uppercase;
+  color: rgba(255,252,249,.4); margin-bottom: 6px;
 }
-.op-push-modal-sub {
-  font-size: 13px;
-  color: rgba(255,252,249,.45);
-  margin: 0 0 18px;
-}
-.op-push-modal-input {
-  width: 100%;
+.op-modal-input, .op-modal-textarea {
+  width: 100%; box-sizing: border-box;
   background: rgba(255,252,249,.06);
   border: 1px solid rgba(255,252,249,.12);
   border-radius: 8px;
@@ -328,8 +276,7 @@ body.op-edit-mode .op-proj:hover .op-proj-edit-btn {
   font-family: 'DM Sans', sans-serif;
   font-size: 14px;
   padding: 10px 14px;
-  margin-bottom: 18px;
-  box-sizing: border-box;
 }
-.op-push-modal-input:focus { outline: none; border-color: #1b5294; }
-.op-push-modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+.op-modal-textarea { resize: vertical; min-height: 90px; }
+.op-modal-input:focus, .op-modal-textarea:focus { outline: none; border-color: #1b5294; }
+.op-modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
