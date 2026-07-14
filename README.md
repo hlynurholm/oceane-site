@@ -19,9 +19,9 @@ Plain static site: `index.html`, `styles.css`, `script.js`, `assets/`. No build 
 2. If the domain's DNS is already on Cloudflare, it's a one-click add. If it's still on Squarespace, you'll transfer/point DNS to Cloudflare first — Cloudflare's domain transfer wizard walks you through it; no rush, the `*.pages.dev` URL works fine to preview and share in the meantime.
 
 ## Editing content for now
-Everything is hand-written HTML — open `index.html` in any text editor:
-- Project titles/categories: each project is a `<a class="op-proj">` block near the middle of the file — edit the `op-proj-title`/`op-proj-kind` text directly.
-- Photos: swap the files in `assets/photos/` (keep the same filenames, or update the `background-image:url(...)` path in `index.html` to match new filenames).
-- Copy (headline, footer line, etc.): plain text in `index.html`, edit directly.
+Every project lives in `data/projects.json` — open it in any text editor:
+- Add/edit/remove a project by editing its entry (title, client, kind, services, year, description).
+- `media` is a list of `{ "type": "image", "src": "filename.jpg" }` or `{ "type": "video", "poster": "filename.jpg" }` in any order — drop matching files into `assets/photos/` and reference the filename. Works with just images, just a video, or a mix.
+- The homepage tiles and each project's detail page (`project.html?p=<slug>`) both read this same file — no other edits needed.
 
-This isn't a CMS yet — it's the "own the code" tradeoff we talked about. When you're ready for a lighter editing workflow (swap photos/text without opening code), that's a separate follow-up — a small admin form that commits changes to this repo, or a headless CMS (Sanity/Contentful) feeding this same frontend. Happy to help scope that whenever.
+This isn't a CMS yet — it's the "own the code" tradeoff we talked about, just with content pulled out into one JSON file instead of scattered across HTML. When you're ready for a lighter editing workflow (a form instead of a text file), that's the "editing tool" described in `HANDOFF.md` — a separate follow-up.

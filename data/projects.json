@@ -1,0 +1,20 @@
+[
+  { "slug": "p1", "n": "01", "title": "Northwind", "kind": "Brand film", "client": "Northwind Outfitters", "services": "Commercial, 4K", "year": "2026",
+    "description": "A brand film built around one long travel day \u2014 no interviews, no voiceover, just the gear doing what it's made for.",
+    "media": [ { "type": "image", "src": "coastline.jpg" }, { "type": "image", "src": "f1-track.jpg" }, { "type": "image", "src": "driver-portrait.jpg" } ] },
+  { "slug": "p2", "n": "02", "title": "Salt & Stone", "kind": "Documentary series", "client": "Salt & Stone Collective", "services": "Documentary", "year": "2025",
+    "description": "A three-part series following a coastal restoration crew through one full season, cut down from about 40 hours of footage.",
+    "media": [ { "type": "video", "poster": "driver-portrait.jpg" } ] },
+  { "slug": "p3", "n": "03", "title": "Field Notes", "kind": "Social cutdowns", "client": "Field Notes Farm", "services": "Social", "year": "2026",
+    "description": "A season of short-form cutdowns shot alongside a single documentary shoot \u2014 same crew, same day, three different feeds.",
+    "media": [ { "type": "video", "poster": "garden-portrait.jpg" }, { "type": "image", "src": "garden-portrait.jpg" }, { "type": "image", "src": "coastline.jpg" } ] },
+  { "slug": "p4", "n": "04", "title": "Undertow", "kind": "Feature documentary", "client": "Undertow Films", "services": "Documentary, 4K", "year": "2024",
+    "description": "A feature-length documentary on competitive free-diving, shot over fourteen months across four coastlines.",
+    "media": [ { "type": "image", "src": "coastline.jpg" } ] },
+  { "slug": "p5", "n": "05", "title": "Harbor Co.", "kind": "Launch spot", "client": "Harbor Co.", "services": "Commercial", "year": "2026",
+    "description": "A 30-second launch spot for a new product line, shot in a single day on location.",
+    "media": [ { "type": "video", "poster": "f1-track.jpg" } ] },
+  { "slug": "p6", "n": "06", "title": "Late Bloom", "kind": "Reels pack", "client": "Late Bloom Studio", "services": "Social", "year": "2025",
+    "description": "A rolling pack of short vertical cuts for weekly posting, shot in batches alongside other productions.",
+    "media": [ { "type": "image", "src": "driver-portrait.jpg" }, { "type": "image", "src": "f1-track.jpg" } ] }
+]
