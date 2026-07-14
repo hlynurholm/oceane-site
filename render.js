@@ -79,7 +79,7 @@ function opVideoBlockHtml(item, idx) {
   // Cloudflare Stream: embed as an autoplay/muted/loop iframe
   if (item.streamUid) {
     var src = 'https://iframe.videodelivery.net/' + item.streamUid +
-              '?autoplay=true&muted=true&loop=true&controls=false&preload=auto';
+              '?controls=true&muted=false&autoplay=false&loop=false&preload=metadata';
     return '' +
       '<div class="op-d-video op-d-stream"' + idxAttr + '>' +
         '<iframe src="' + src + '" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="border:none;width:100%;height:100%;position:absolute;inset:0"></iframe>' +
