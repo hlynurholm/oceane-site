@@ -21,7 +21,8 @@
         "type": "image",
         "src": "driver-portrait.jpg"
       }
-    ]
+    ],
+    "bgPosition": "58.2% 35.0%"
   },
   {
     "slug": "p2",
