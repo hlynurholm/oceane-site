@@ -76,17 +76,17 @@ body.op-edit-mode #op-new-project { display: inline-flex; }
 */
 .op-img-replace {
   position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
+  top: 14px; right: 14px;
+  transform: none;
   background: rgba(20,19,16,.78);
   backdrop-filter: blur(8px);
   color: #fffcf9;
   border: 1px solid rgba(255,252,249,.3);
   border-radius: 999px;
   font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
-  padding: 10px 22px;
+  padding: 7px 16px;
   cursor: pointer;
   opacity: 0;
   pointer-events: none;
@@ -96,8 +96,9 @@ body.op-edit-mode #op-new-project { display: inline-flex; }
 }
 .op-img-replace:hover { background: rgba(27,82,148,.85); border-color: #1b5294; }
 
-/* Show replace button on hover of its container */
-body.op-edit-mode .op-hero-media:hover > .op-img-replace,
+/* Hero: trigger on the whole .op-hero section so hovering the logo
+   (a sibling of .op-hero-media, not a child) doesn't hide the button */
+body.op-edit-mode .op-hero:hover .op-hero-media > .op-img-replace,
 body.op-edit-mode .op-proj:hover > .op-img-replace,
 body.op-edit-mode .op-d-video:hover > .op-img-replace,
 body.op-edit-mode .op-img-cell:hover > .op-img-replace {
@@ -119,13 +120,9 @@ body.op-edit-mode [contenteditable]:focus {
   box-shadow: 0 0 0 2px #1b5294;
 }
 
-/* ── Video URL button ───────────────────────────────────────────────────────── */
+/* ── Video URL button — sits below the replace button ───────────────────────── */
 .op-video-url-btn {
-  top: auto !important;
-  left: auto !important;
-  transform: none !important;
-  bottom: 14px;
-  right: 14px;
+  top: 50px;  /* below the Replace photo button */
   font-size: 11px;
   padding: 6px 14px;
 }
