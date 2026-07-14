@@ -114,8 +114,15 @@ focalModal.addEventListener('click', e => {
 
 // ── Stream picker modal ───────────────────────────────────────────────────────
 const streamModal = createModal(`
-  <p class="op-modal-title">Choose from Cloudflare Stream</p>
-  <p class="op-modal-sub" id="stream-sub">Loading your video library…</p>
+  <p class="op-modal-title">Add video</p>
+  <div class="op-stream-upload-row">
+    <button class="op-edit-btn op-edit-btn-primary" id="stream-upload-btn">↑ Upload new video</button>
+    <div class="op-stream-progress" id="stream-progress" hidden>
+      <div class="op-stream-progress-bar" id="stream-progress-bar"></div>
+    </div>
+    <span class="op-stream-upload-status" id="stream-upload-status"></span>
+  </div>
+  <p class="op-modal-sub" id="stream-sub" style="margin-top:16px">Or choose from your library:</p>
   <div id="stream-grid" class="op-stream-grid"></div>
   <div class="op-modal-btns" style="margin-top:16px">
     <button class="op-edit-btn" id="stream-cancel">Cancel</button>
@@ -880,43 +887,107 @@ function addVideoUrlBtn(el, item) {
 
 // Open Stream picker and resolve with selected video object (or null)
 let _streamResolve = null;
+
+function loadStreamGrid() {
+  const sub  = $('stream-sub');
+  const grid = $('stream-grid');
+  sub.textContent = 'Loading your library…';
+  grid.innerHTML  = '';
+  fetch('/api/stream-videos').then(r => r.json()).then(data => {
+    if (!data.configured) { sub.textContent = 'Cloudflare credentials not configured.'; return; }
+    if (!data.videos.length) { sub.textContent = 'No videos yet — upload one above.'; return; }
+    sub.textContent = `${data.videos.length} video${data.videos.length !== 1 ? 's' : ''} — click one to add it.`;
+    data.videos.forEach(v => {
+      const card = document.createElement('div');
+      card.className = 'op-stream-card';
+      card.innerHTML = `<img src="${v.thumbnail || ''}" alt="${v.name}" onerror="this.style.display='none'"><span>${v.name}</span>`;
+      card.addEventListener('click', () => {
+        streamModal.hidden = true;
+        if (_streamResolve) { _streamResolve(v); _streamResolve = null; }
+      });
+      grid.appendChild(card);
+    });
+  }).catch(e => { sub.textContent = 'Error: ' + e.message; });
+}
+
 function pickFromStream() {
   return new Promise(resolve => {
     _streamResolve = resolve;
-    const sub  = $('stream-sub');
-    const grid = $('stream-grid');
-    sub.textContent  = 'Loading your video library…';
-    grid.innerHTML   = '';
+    $('stream-upload-status').textContent = '';
+    $('stream-progress').hidden = true;
+    $('stream-progress-bar').style.width = '0';
     streamModal.hidden = false;
-
-    fetch('/api/stream-videos').then(r => r.json()).then(data => {
-      if (!data.configured) {
-        sub.textContent = 'Cloudflare credentials not configured in admin/cf-config.json.';
-        return;
-      }
-      if (!data.videos.length) {
-        sub.textContent = 'No videos found in your Stream account. Upload some at dash.cloudflare.com → Stream.';
-        return;
-      }
-      sub.textContent = `${data.videos.length} video${data.videos.length !== 1 ? 's' : ''} in your library — click one to add it.`;
-      data.videos.forEach(v => {
-        const card = document.createElement('div');
-        card.className = 'op-stream-card';
-        card.innerHTML = `
-          <img src="${v.thumbnail || ''}" alt="${v.name}" onerror="this.style.display='none'">
-          <span>${v.name}</span>
-        `;
-        card.addEventListener('click', () => {
-          streamModal.hidden = true;
-          if (_streamResolve) { _streamResolve(v); _streamResolve = null; }
-        });
-        grid.appendChild(card);
-      });
-    }).catch(e => {
-      sub.textContent = 'Error: ' + e.message;
-    });
+    loadStreamGrid();
   });
 }
+
+// Upload video directly to Cloudflare Stream from the browser
+$('stream-upload-btn').addEventListener('click', () => {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'video/*';
+  input.onchange = async () => {
+    const file = input.files[0];
+    if (!file) return;
+
+    const status   = $('stream-upload-status');
+    const progress = $('stream-progress');
+    const bar      = $('stream-progress-bar');
+
+    status.textContent = 'Getting upload URL…';
+    progress.hidden = false;
+    bar.style.width = '0%';
+    $('stream-upload-btn').disabled = true;
+
+    try {
+      // Step 1: get a one-time direct-upload URL from our server
+      const r = await fetch('/api/stream-upload-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: file.name })
+      });
+      const { uid, uploadURL, error } = await r.json();
+      if (error) throw new Error(error);
+
+      // Step 2: upload directly to Cloudflare (XHR for progress events)
+      await new Promise((res, rej) => {
+        const form = new FormData();
+        form.append('file', file);
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', uploadURL);
+        xhr.upload.onprogress = e => {
+          if (e.lengthComputable) {
+            const pct = Math.round(e.loaded / e.total * 100);
+            bar.style.width = pct + '%';
+            status.textContent = `Uploading… ${pct}%`;
+          }
+        };
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) res();
+          else rej(new Error('Upload failed: ' + xhr.status));
+        };
+        xhr.onerror = () => rej(new Error('Network error'));
+        xhr.send(form);
+      });
+
+      bar.style.width = '100%';
+      status.textContent = '✓ Uploaded — processing…';
+
+      // Immediately resolve with the new uid so it can be added to the project.
+      // CF processes the video async so thumbnail won't exist yet.
+      streamModal.hidden = true;
+      if (_streamResolve) {
+        _streamResolve({ uid, name: file.name, thumbnail: '' });
+        _streamResolve = null;
+      }
+    } catch (e) {
+      status.textContent = 'Error: ' + e.message;
+    } finally {
+      $('stream-upload-btn').disabled = false;
+    }
+  };
+  input.click();
+});
 
 // Cancel stream picker
 $('stream-cancel').addEventListener('click', () => {

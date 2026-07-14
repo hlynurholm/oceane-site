@@ -439,6 +439,35 @@ body.op-edit-mode .op-draggable.op-active .op-drag-tooltip { opacity: 1; }
 .op-focal-crosshair-h { left: 0; right: 0; height: 1px; transform: translateY(-50%); }
 .op-focal-crosshair-v { top: 0; bottom: 0; width: 1px; transform: translateX(-50%); }
 
+/* ── Stream upload row ───────────────────────────────────────────────────────── */
+.op-stream-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.op-stream-progress {
+  flex: 1;
+  min-width: 120px;
+  height: 4px;
+  background: rgba(255,252,249,.1);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.op-stream-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: #1b5294;
+  border-radius: 999px;
+  transition: width .2s;
+}
+.op-stream-upload-status {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  color: rgba(255,252,249,.5);
+  white-space: nowrap;
+}
+
 /* ── Stream video picker ─────────────────────────────────────────────────────── */
 .op-stream-grid {
   display: grid;

@@ -125,6 +125,24 @@ function getCfConfig() {
   } catch { return null; }
 }
 
+app.post('/api/stream-upload-url', async (req, res) => {
+  const cfg = getCfConfig();
+  if (!cfg) return res.status(400).json({ error: 'CF not configured' });
+  try {
+    const r = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${cfg.accountId}/stream/direct_upload`,
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${cfg.apiToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ maxDurationSeconds: 21600, meta: { name: req.body.name || 'upload' } })
+      }
+    );
+    const data = await r.json();
+    if (!data.success) return res.status(502).json({ error: data.errors?.[0]?.message || 'CF error' });
+    res.json({ uid: data.result.uid, uploadURL: data.result.uploadURL });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.get('/api/stream-videos', async (req, res) => {
   const cfg = getCfConfig();
   if (!cfg) return res.json({ configured: false, videos: [] });
