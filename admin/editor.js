@@ -171,8 +171,12 @@ function exitEditMode() {
     if (el._opInput) el.removeEventListener('input', el._opInput);
   });
   document.querySelectorAll(
-    '.op-img-replace, .op-media-remove, .op-media-add-row, .op-tile-controls, .op-video-url-btn'
+    '.op-img-replace, .op-media-remove, .op-media-add-row, .op-tile-controls, .op-video-url-btn,' +
+    '.op-drag-ring, .op-resize-handle, .op-drag-tooltip'
   ).forEach(el => el.remove());
+  document.querySelectorAll('.op-draggable').forEach(el => {
+    el.classList.remove('op-draggable', 'op-active', 'op-dragging');
+  });
 }
 
 // ── Homepage: static text (hero, footer) ─────────────────────────────────────
@@ -195,6 +199,16 @@ function setupHomeStaticEditing() {
       markDirty();
     });
   }
+
+  // Draggable + resizable overlay elements
+  const logo = document.querySelector('.op-hero-logo');
+  if (logo) makeDraggableResizable(logo, '.op-hero-logo', 'index.html');
+
+  // Buttons — resize only (drag would break the flex layout)
+  document.querySelectorAll('.op-header .op-btn, .op-footer-cta .op-btn').forEach((btn, i) => {
+    const sel = btn.closest('.op-header') ? '.op-header .op-btn' : '.op-footer-cta .op-btn';
+    makeResizable(btn, sel, 'index.html');
+  });
 }
 
 // ── Homepage: project tiles ───────────────────────────────────────────────────
@@ -451,6 +465,161 @@ function setIndexHtml(selector, html) {
 function setIndexAttr(selector, name, value) {
   const e = indexEdits.find(u => u.selector === selector && u.attr);
   if (e) e.attr = { name, value }; else indexEdits.push({ selector, attr: { name, value } });
+}
+
+// ── Drag & resize ─────────────────────────────────────────────────────────────
+
+/*
+  makeDraggableResizable: for position:absolute elements (like .op-hero-logo).
+  Drag updates top/left as % of the offsetParent. Resize handle (SE corner)
+  updates width in px. Both save back to the HTML file as inline style.
+*/
+function makeDraggableResizable(el, cssSelector, file) {
+  el.classList.add('op-draggable');
+  el.style.position = el.style.position || 'absolute'; // keep existing if set
+
+  const ring    = el.appendChild(Object.assign(document.createElement('div'), { className: 'op-drag-ring' }));
+  const handle  = el.appendChild(Object.assign(document.createElement('div'), { className: 'op-resize-handle' }));
+  const tooltip = el.appendChild(Object.assign(document.createElement('div'), { className: 'op-drag-tooltip' }));
+
+  function saveStyle() {
+    const s = el.style;
+    // Build a clean style string with only the layout props we manage
+    const parts = [];
+    if (s.top)    parts.push(`top:${s.top}`);
+    if (s.left)   parts.push(`left:${s.left}`);
+    if (s.width)  parts.push(`width:${s.width}`);
+    if (s.height) parts.push(`height:${s.height}`);
+    // Preserve transform (centering) from original CSS
+    parts.push('transform:translate(-50%,-50%)');
+    setIndexAttr(cssSelector, 'style', parts.join(';'));
+    markDirty();
+  }
+
+  // Drag to move
+  el.addEventListener('mousedown', e => {
+    if (!editMode || e.target === handle) return;
+    e.preventDefault(); e.stopPropagation();
+
+    const container = el.offsetParent;
+    const cRect     = container.getBoundingClientRect();
+    const elRect    = el.getBoundingClientRect();
+    // Anchor to the center of the element (matching translate(-50%,-50%))
+    const startTopPct  = ((elRect.top  + elRect.height / 2 - cRect.top)  / cRect.height) * 100;
+    const startLeftPct = ((elRect.left + elRect.width  / 2 - cRect.left) / cRect.width)  * 100;
+    const startMX = e.clientX, startMY = e.clientY;
+
+    el.classList.add('op-active', 'op-dragging');
+    document.body.classList.add('op-dragging');
+
+    function onMove(e) {
+      const top  = startTopPct  + (e.clientY - startMY) / cRect.height * 100;
+      const left = startLeftPct + (e.clientX - startMX) / cRect.width  * 100;
+      el.style.top  = top.toFixed(2)  + '%';
+      el.style.left = left.toFixed(2) + '%';
+      tooltip.textContent = `${left.toFixed(0)}% / ${top.toFixed(0)}%`;
+    }
+    function onUp() {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      el.classList.remove('op-dragging');
+      document.body.classList.remove('op-dragging');
+      snapshot(); saveStyle();
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+
+  // Resize handle (SE corner → change width)
+  handle.addEventListener('mousedown', e => {
+    e.preventDefault(); e.stopPropagation();
+    const startX = e.clientX;
+    const startW = el.offsetWidth;
+    el.classList.add('op-active');
+
+    function onMove(e) {
+      const w = Math.max(20, startW + (e.clientX - startX));
+      el.style.width  = w + 'px';
+      el.style.height = 'auto';
+      tooltip.textContent = `${w}px`;
+    }
+    function onUp() {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      snapshot(); saveStyle();
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+}
+
+/*
+  makeResizable: for in-flow elements (buttons). Uses transform:scale() so
+  it doesn't affect layout. Also allows nudging position with translate.
+*/
+function makeResizable(el, cssSelector, file) {
+  el.classList.add('op-draggable');
+  el.style.display = el.style.display || 'inline-flex';
+
+  const ring    = el.appendChild(Object.assign(document.createElement('div'), { className: 'op-drag-ring' }));
+  const handle  = el.appendChild(Object.assign(document.createElement('div'), { className: 'op-resize-handle' }));
+  const tooltip = el.appendChild(Object.assign(document.createElement('div'), { className: 'op-drag-tooltip' }));
+
+  let scale = 1, tx = 0, ty = 0;
+
+  function applyTransform() {
+    el.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+  }
+  function saveStyle() {
+    setIndexAttr(cssSelector, 'style', `transform:translate(${tx}px,${ty}px) scale(${scale.toFixed(3)})`);
+    markDirty();
+  }
+
+  // Drag to nudge position
+  el.addEventListener('mousedown', e => {
+    if (!editMode || e.target === handle) return;
+    e.preventDefault(); e.stopPropagation();
+    const startX = e.clientX, startY = e.clientY;
+    const startTx = tx, startTy = ty;
+    el.classList.add('op-active', 'op-dragging');
+    document.body.classList.add('op-dragging');
+
+    function onMove(e) {
+      tx = startTx + (e.clientX - startX);
+      ty = startTy + (e.clientY - startY);
+      applyTransform();
+      tooltip.textContent = `${tx > 0 ? '+' : ''}${Math.round(tx)}px / ${ty > 0 ? '+' : ''}${Math.round(ty)}px`;
+    }
+    function onUp() {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      el.classList.remove('op-dragging');
+      document.body.classList.remove('op-dragging');
+      snapshot(); saveStyle();
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+
+  // Resize handle → scale up/down
+  handle.addEventListener('mousedown', e => {
+    e.preventDefault(); e.stopPropagation();
+    const startX = e.clientX, startScale = scale;
+    el.classList.add('op-active');
+
+    function onMove(e) {
+      scale = Math.max(0.3, startScale + (e.clientX - startX) * 0.005);
+      applyTransform();
+      tooltip.textContent = `${Math.round(scale * 100)}%`;
+    }
+    function onUp() {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      snapshot(); saveStyle();
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
 }
 
 // ── Replace button helpers ────────────────────────────────────────────────────

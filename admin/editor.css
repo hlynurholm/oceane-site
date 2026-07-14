@@ -199,6 +199,64 @@ body.op-edit-mode .op-proj:hover .op-tile-controls { opacity: 1; pointer-events:
 .op-tile-btn:hover { background: rgba(27,82,148,.75); border-color: #1b5294; }
 .op-tile-btn-danger:hover { background: rgba(180,40,40,.75); border-color: rgba(255,100,100,.5); }
 
+/* ── Drag & resize ───────────────────────────────────────────────────────────── */
+body.op-edit-mode .op-draggable {
+  cursor: grab;
+  user-select: none;
+}
+body.op-edit-mode .op-dragging {
+  cursor: grabbing !important;
+}
+
+/* Dashed outline shown on hover / while selected */
+.op-drag-ring {
+  position: absolute;
+  inset: -5px;
+  border: 2px dashed rgba(27,82,148,.65);
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s;
+  z-index: 100;
+}
+body.op-edit-mode .op-draggable:hover .op-drag-ring,
+body.op-edit-mode .op-draggable.op-active .op-drag-ring { opacity: 1; }
+
+/* Resize handle — bottom-right corner dot */
+.op-resize-handle {
+  position: absolute;
+  bottom: -7px; right: -7px;
+  width: 14px; height: 14px;
+  background: #1b5294;
+  border: 2px solid #fffcf9;
+  border-radius: 50%;
+  cursor: se-resize;
+  z-index: 101;
+  opacity: 0;
+  transition: opacity .15s;
+}
+body.op-edit-mode .op-draggable:hover .op-resize-handle,
+body.op-edit-mode .op-draggable.op-active .op-resize-handle { opacity: 1; }
+
+/* Tooltip shown during drag/resize */
+.op-drag-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px); left: 50%;
+  transform: translateX(-50%);
+  background: rgba(20,19,16,.85);
+  color: rgba(255,252,249,.9);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .1s;
+  z-index: 102;
+}
+body.op-edit-mode .op-draggable.op-active .op-drag-tooltip { opacity: 1; }
+
 /* ── Snapshots panel ────────────────────────────────────────────────────────── */
 .op-edit-snaps-wrap { position: relative; }
 .op-edit-snaps-panel {

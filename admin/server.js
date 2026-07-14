@@ -5,6 +5,7 @@ const path = require('path');
 const multer = require('multer');
 const { execSync } = require('child_process');
 const cheerio = require('cheerio');
+const sharp = require('sharp');
 
 const app = express();
 const PORT = 3000;
@@ -15,17 +16,40 @@ if (!fs.existsSync(SNAPS)) fs.mkdirSync(SNAPS, { recursive: true });
 
 app.use(express.json({ limit: '10mb' }));
 
-// File uploads → assets/photos/
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: path.join(SITE, 'assets', 'photos'),
-    filename: (req, file, cb) => {
-      const safe = file.originalname.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9._-]/g, '');
-      cb(null, safe || 'upload-' + Date.now() + path.extname(file.originalname));
-    }
-  }),
-  limits: { fileSize: 50 * 1024 * 1024 }
-});
+// File uploads — stored in memory first so sharp can compress before writing to disk
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
+
+async function compressAndSave(buffer, originalname) {
+  const safe = originalname.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9._-]/g, '');
+  const ext = path.extname(safe).toLowerCase();
+  const isPng = ext === '.png';
+  const dest = path.join(SITE, 'assets', 'photos');
+
+  let outBuffer, outName;
+
+  if (isPng) {
+    // PNGs (logos, graphics with transparency) — keep format, resize, compress
+    outBuffer = await sharp(buffer)
+      .resize(2400, 2400, { fit: 'inside', withoutEnlargement: true })
+      .png({ compressionLevel: 8 })
+      .toBuffer();
+    outName = safe;
+  } else {
+    // Photos — convert to WebP: max 2400px, quality 82
+    // WebP is 30-50% smaller than JPEG at same perceived quality
+    const base = path.basename(safe, ext);
+    outName = base + '.webp';
+    outBuffer = await sharp(buffer)
+      .resize(2400, 2400, { fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 82 })
+      .toBuffer();
+  }
+
+  fs.writeFileSync(path.join(dest, outName), outBuffer);
+  const inKB = Math.round(buffer.length / 1024);
+  const outKB = Math.round(outBuffer.length / 1024);
+  return { filename: outName, inKB, outKB };
+}
 
 // Serve admin static files at /admin/
 app.use('/admin', express.static(__dirname));
@@ -78,9 +102,15 @@ app.post('/api/save-html', (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/upload', upload.single('file'), (req, res) => {
+app.post('/api/upload', upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file' });
-  res.json({ ok: true, filename: req.file.filename });
+  try {
+    const result = await compressAndSave(req.file.buffer, req.file.originalname);
+    console.log(`  Upload: ${req.file.originalname} ${result.inKB}KB → ${result.outName || result.filename} ${result.outKB}KB`);
+    res.json({ ok: true, filename: result.filename });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 app.get('/api/snapshots', (req, res) => {
