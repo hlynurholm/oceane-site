@@ -235,39 +235,45 @@ function setupHomeStaticEditing() {
 function setupHomeTileEditing() {
   waitFor('#op-projects .op-proj', tiles => {
     tiles.forEach(tile => {
-      const slug  = tile.id.replace('work-', '');
-      const media = tile.querySelector('.op-proj-media');
+      const slug = tile.id.replace('work-', '');
+      const proj = projects.find(p => p.slug === slug);
 
-      // Replace cover photo — append button to tile itself (position:relative)
-      if (media) {
-        addReplaceBtn(tile, async () => {
+      const controls = document.createElement('div');
+      controls.className = 'op-tile-controls';
+      controls.innerHTML = `
+        <button class="op-tile-btn" data-action="cover-photo">Photo bg</button>
+        <button class="op-tile-btn" data-action="cover-video">Video bg</button>
+        <button class="op-tile-btn" data-action="edit">Edit →</button>
+        <button class="op-tile-btn" data-action="up" title="Move up">↑</button>
+        <button class="op-tile-btn" data-action="down" title="Move down">↓</button>
+        <button class="op-tile-btn op-tile-btn-danger" data-action="delete">✕</button>
+      `;
+      controls.addEventListener('click', async e => {
+        const action = e.target.dataset.action;
+        if (!action) return;
+        e.preventDefault(); e.stopPropagation();
+
+        if (action === 'cover-photo') {
           const fn = await pickAndUpload('image/*');
           if (!fn) return;
           snapshot();
-          media.style.backgroundImage = `url(assets/photos/${fn})`;
-          const proj = projects.find(p => p.slug === slug);
-          if (proj && proj.media[0]) {
+          delete proj.coverStreamUid;
+          // update cover image in media array too
+          if (proj.media[0]) {
             if (proj.media[0].type === 'video') proj.media[0].poster = fn;
             else proj.media[0].src = fn;
           }
           markDirty();
-        });
-      }
-
-      // Tile management controls (Edit, ↑, ↓, Delete)
-      const idx = projects.findIndex(p => p.slug === slug);
-      const controls = document.createElement('div');
-      controls.className = 'op-tile-controls';
-      controls.innerHTML = `
-        <button class="op-tile-btn" data-action="edit">Edit →</button>
-        <button class="op-tile-btn" data-action="up" title="Move up">↑</button>
-        <button class="op-tile-btn" data-action="down" title="Move down">↓</button>
-        <button class="op-tile-btn op-tile-btn-danger" data-action="delete">✕ Delete</button>
-      `;
-      controls.addEventListener('click', e => {
-        const action = e.target.dataset.action;
-        if (!action) return;
-        e.preventDefault(); e.stopPropagation();
+          reRenderHome();
+        }
+        if (action === 'cover-video') {
+          const v = await pickFromStream();
+          if (!v) return;
+          snapshot();
+          proj.coverStreamUid = v.uid;
+          markDirty();
+          reRenderHome();
+        }
         if (action === 'edit')   { location.href = `project.html?p=${slug}`; }
         if (action === 'up')     { moveProject(slug, -1); }
         if (action === 'down')   { moveProject(slug, +1); }

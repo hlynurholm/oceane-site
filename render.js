@@ -23,13 +23,26 @@ function opProjTile(p, index, total) {
   var side = alignRight ? 'right' : 'left';
   var scrimClass = alignRight ? 'op-proj-scrim-r' : 'op-proj-scrim-l';
   var timecode = '00:' + num + ':14:0' + ((index % 9) + 1);
-  var cover = p.media && p.media.length
-    ? (p.media[0].type === 'video' ? p.media[0].poster : p.media[0].src)
-    : '';
-  var bgStyle = cover ? 'background-image:url(assets/photos/' + cover + ')' : 'background:#2a2824';
+
+  var mediaEl;
+  if (p.coverStreamUid) {
+    var src = 'https://iframe.videodelivery.net/' + p.coverStreamUid +
+              '?autoplay=true&muted=true&loop=true&controls=false&preload=auto';
+    mediaEl = '<div class="op-proj-media" style="background:#141310">' +
+                '<iframe src="' + src + '" allow="autoplay" tabindex="-1" ' +
+                'style="border:none;position:absolute;inset:0;width:100%;height:100%;pointer-events:none"></iframe>' +
+              '</div>';
+  } else {
+    var cover = p.media && p.media.length
+      ? (p.media[0].type === 'video' ? p.media[0].poster : p.media[0].src)
+      : '';
+    var bgStyle = cover ? 'background-image:url(assets/photos/' + cover + ')' : 'background:#2a2824';
+    mediaEl = '<div class="op-proj-media" style="' + bgStyle + '"></div>';
+  }
+
   return '' +
     '<a class="op-proj" href="project.html?p=' + p.slug + '" id="work-' + p.slug + '">' +
-      '<div class="op-proj-media" style="' + bgStyle + '"></div>' +
+      mediaEl +
       '<div class="op-proj-dotgrid" style="' + side + ':0"></div>' +
       '<div class="op-proj-ruler" style="' + side + ':0"></div>' +
       '<div class="' + scrimClass + '"></div>' +
