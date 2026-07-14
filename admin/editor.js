@@ -266,8 +266,9 @@ function exitEditMode() {
   });
   document.querySelectorAll(
     '.op-img-replace, .op-media-remove, .op-media-add-row, .op-tile-controls, .op-video-url-btn,' +
-    '.op-drag-ring, .op-resize-handle, .op-drag-tooltip'
+    '.op-drag-ring, .op-resize-handle, .op-drag-tooltip, .op-text-resize-badge'
   ).forEach(el => el.remove());
+  document.querySelectorAll('[data-op-field]').forEach(el => { el.style.position = ''; });
   document.querySelectorAll('.op-draggable').forEach(el => {
     el.classList.remove('op-draggable', 'op-active', 'op-dragging');
   });
@@ -379,7 +380,10 @@ function attachProjectEditing() {
 
   // Text fields
   document.querySelectorAll('[data-op-field]').forEach(el => {
-    makeProjectEditable(el, proj, el.dataset.opField);
+    const field = el.dataset.opField;
+    makeProjectEditable(el, proj, field);
+    // Resize control only on block-level fields (not inline spans like client/services/year)
+    if (el.tagName !== 'SPAN') addTextResizeHandle(el, proj, field);
   });
 
   // Media items — append replace buttons to the correct positioned container
@@ -603,6 +607,50 @@ function moveProject(slug, dir) {
 
 function renumberProjects() {
   projects.forEach((p, i) => { p.n = String(i + 1).padStart(2, '0'); });
+}
+
+// ── Text resize ───────────────────────────────────────────────────────────────
+function addTextResizeHandle(el, proj, field) {
+  el.style.position = 'relative';
+
+  const badge = document.createElement('div');
+  badge.className = 'op-text-resize-badge';
+  badge.innerHTML =
+    '<button class="op-text-resize-btn" data-step="-2">−</button>' +
+    '<span class="op-text-resize-val"></span>' +
+    '<button class="op-text-resize-btn" data-step="2">+</button>' +
+    '<button class="op-text-resize-btn op-text-resize-auto" data-auto="1">Auto</button>';
+
+  function readPx() { return parseFloat(getComputedStyle(el).fontSize); }
+
+  function refresh() {
+    const isAuto = !el.style.fontSize;
+    badge.querySelector('.op-text-resize-val').textContent =
+      isAuto ? 'auto' : Math.round(parseFloat(el.style.fontSize)) + 'px';
+    badge.querySelector('.op-text-resize-auto').classList.toggle('op-text-resize-auto-on', isAuto);
+  }
+
+  badge.addEventListener('mousedown', e => {
+    const btn = e.target.closest('[data-step],[data-auto]');
+    if (!btn) return;
+    e.preventDefault(); e.stopPropagation();
+    snapshot();
+    if (btn.dataset.auto) {
+      el.style.fontSize = '';
+      if (proj.styles) delete proj.styles[field];
+    } else {
+      const step = parseInt(btn.dataset.step);
+      const next = Math.max(8, Math.round(readPx() + step));
+      el.style.fontSize = next + 'px';
+      if (!proj.styles) proj.styles = {};
+      proj.styles[field] = next + 'px';
+    }
+    refresh();
+    markDirty();
+  });
+
+  refresh();
+  el.appendChild(badge);
 }
 
 // ── Editable text ─────────────────────────────────────────────────────────────

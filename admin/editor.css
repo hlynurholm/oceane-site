@@ -106,6 +106,55 @@ body.op-edit-mode .op-img-cell:hover > .op-img-replace {
   pointer-events: auto;
 }
 
+/* ── Text resize badge ───────────────────────────────────────────────────────── */
+.op-text-resize-badge {
+  position: absolute;
+  top: 0; right: 0;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(20,19,16,.88);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,252,249,.15);
+  border-radius: 999px;
+  padding: 3px 6px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .15s;
+  z-index: 40;
+  white-space: nowrap;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  color: rgba(255,252,249,.6);
+  user-select: none;
+}
+body.op-edit-mode [data-op-field]:hover .op-text-resize-badge,
+body.op-edit-mode [data-op-field]:focus-within .op-text-resize-badge {
+  opacity: 1;
+  pointer-events: auto;
+}
+.op-text-resize-btn {
+  background: none;
+  border: none;
+  color: rgba(255,252,249,.75);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 5px;
+  border-radius: 4px;
+  transition: background .1s;
+}
+.op-text-resize-btn:hover { background: rgba(255,252,249,.12); color: #fffcf9; }
+.op-text-resize-val {
+  min-width: 34px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255,252,249,.5);
+}
+/* Auto button highlights when currently active (no override) */
+.op-text-resize-auto-on { color: #82abcc !important; }
+
 /* ── Editable text highlights ───────────────────────────────────────────────── */
 body.op-edit-mode [contenteditable] {
   outline: none;

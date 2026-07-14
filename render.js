@@ -1,3 +1,8 @@
+function opFs(proj, field) {
+  var s = proj.styles && proj.styles[field];
+  return s ? ' style="font-size:' + s + '"' : '';
+}
+
 function opGroupMedia(items) {
   var groups = [], buffer = [], bufferIdxs = [];
   items.forEach(function(item, i) {
@@ -130,14 +135,14 @@ function opRenderDetail() {
           '<a class="op-d-back" href="index.html">&larr; All projects</a>' +
           '<div class="op-d-n"><span class="op-d-n-dot"></span>' + num + ' / ' + tot + '</div>' +
         '</div>' +
-        '<div class="op-d-client" data-op-field="title">' + proj.title + '</div>' +
-        '<div class="op-d-title" data-op-field="kind">' + proj.kind + '</div>' +
+        '<div class="op-d-client" data-op-field="title"' + opFs(proj,'title') + '>' + proj.title + '</div>' +
+        '<div class="op-d-title" data-op-field="kind"' + opFs(proj,'kind') + '>' + proj.kind + '</div>' +
         '<div class="op-d-meta-row">' +
           '<div class="op-d-meta-item"><span class="op-d-meta-label">Client</span><span class="op-d-meta-value" data-op-field="client">' + proj.client + '</span></div>' +
           '<div class="op-d-meta-item"><span class="op-d-meta-label">Services</span><span class="op-d-meta-value" data-op-field="services">' + proj.services + '</span></div>' +
           '<div class="op-d-meta-item"><span class="op-d-meta-label">Year</span><span class="op-d-meta-value" data-op-field="year">' + proj.year + '</span></div>' +
         '</div>' +
-        '<div class="op-d-desc"><p data-op-field="description">' + proj.description + '</p></div>' +
+        '<div class="op-d-desc"><p data-op-field="description"' + opFs(proj,'description') + '>' + proj.description + '</p></div>' +
       '</div>' +
       (groups.length ? '<div class="op-d-gallery">' + galleryHtml + '</div>' : '') +
       '<div class="op-d-nav">' +
