@@ -44,7 +44,16 @@
     "services": "Commercial",
     "year": "2026",
     "description": "",
-    "media": []
+    "media": [
+      {
+        "type": "video",
+        "streamUid": "58869d734e378f050aa4f927710bf587",
+        "poster": "https://customer-glfted1bbx13jo4x.cloudflarestream.com/58869d734e378f050aa4f927710bf587/thumbnails/thumbnail.jpg",
+        "url": "",
+        "width": 3088,
+        "height": 2160
+      }
+    ]
   },
   {
     "slug": "p3",
