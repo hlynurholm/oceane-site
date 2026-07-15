@@ -796,6 +796,21 @@ function makeProjectEditable(el, proj, field) {
     clone.querySelectorAll('.op-text-resize-badge,.op-text-width-handle').forEach(n => n.remove());
     proj[field] = clone.innerText.trim();
     markDirty();
+    // If all real text is gone, the only remaining child may be the contenteditable=false
+    // handle — Chrome cannot place a cursor there. Insert a <br> so the field stays editable.
+    const hasTextNode = [...el.childNodes].some(
+      n => n.nodeType === Node.TEXT_NODE || n.nodeName === 'BR'
+    );
+    if (!hasTextNode) {
+      const br = document.createElement('br');
+      el.insertBefore(br, el.firstChild);
+      const range = document.createRange();
+      range.setStartBefore(br);
+      range.collapse(true);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
   };
   el.addEventListener('focus', el._opFocus);
   el.addEventListener('input', el._opInput);
