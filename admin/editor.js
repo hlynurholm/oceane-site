@@ -683,6 +683,10 @@ function addTextResizeHandle(el, proj, field) {
   el.parentNode.insertBefore(wrap, el);
   wrap.appendChild(el);
 
+  // If the field is already empty, the handle (contenteditable=false) will be
+  // the only child — Chrome can't place a cursor there. A <br> fixes it.
+  if (!el.textContent.trim()) el.appendChild(document.createElement('br'));
+
   const badge = document.createElement('div');
   badge.className = 'op-text-resize-badge';
   badge.innerHTML =
