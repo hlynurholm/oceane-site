@@ -292,10 +292,16 @@ function exitEditMode() {
 
 // ── Homepage: static text (hero, footer) ─────────────────────────────────────
 function setupHomeStaticEditing() {
-  makeIndexEditable(document.querySelector('.op-hero h1'), '.op-hero h1');
-  makeIndexEditable(document.querySelector('.op-hero-sub'), '.op-hero-sub');
-  makeIndexEditable(document.querySelector('.op-footer h2'), '.op-footer h2');
-  makeIndexEditable(document.querySelector('.op-footer-note'), '.op-footer-note');
+  [
+    ['.op-hero h1',       '.op-hero h1'],
+    ['.op-hero-sub',      '.op-hero-sub'],
+    ['.op-footer h2',     '.op-footer h2'],
+    ['.op-footer-note',   '.op-footer-note'],
+  ].forEach(([sel, saveSel]) => {
+    const el = document.querySelector(sel);
+    makeIndexEditable(el, saveSel);
+    addIndexTextResizeHandle(el, saveSel);
+  });
 
   // Hero background controls — tile-style, bottom of media area (avoids the header)
   const heroMedia = document.querySelector('.op-hero-media');
@@ -778,6 +784,93 @@ function addTextWidthHandle(el, proj, field) {
     setFieldStyles(proj, field, styles);
     tip.textContent = 'auto';
     markDirty();
+  });
+}
+
+// ── Text resize for home-page (index) elements ────────────────────────────────
+function addIndexTextResizeHandle(el, selector) {
+  if (!el) return;
+  const wrap = document.createElement('div');
+  wrap.className = 'op-field-wrap';
+  el.parentNode.insertBefore(wrap, el);
+  wrap.appendChild(el);
+  if (!el.textContent.trim()) el.appendChild(document.createElement('br'));
+
+  const badge = document.createElement('div');
+  badge.className = 'op-text-resize-badge';
+  badge.innerHTML =
+    '<button class="op-text-resize-btn" data-step="-2">−</button>' +
+    '<span class="op-text-resize-val"></span>' +
+    '<button class="op-text-resize-btn" data-step="2">+</button>' +
+    '<button class="op-text-resize-btn op-text-resize-auto" data-auto="1">Auto</button>';
+
+  function readPx() { return parseFloat(getComputedStyle(el).fontSize); }
+  function saveStyle() {
+    setIndexAttr(selector, 'style', el.getAttribute('style') || '');
+    markDirty();
+  }
+  function refresh() {
+    const isAuto = !el.style.fontSize;
+    badge.querySelector('.op-text-resize-val').textContent =
+      isAuto ? 'auto' : Math.round(parseFloat(el.style.fontSize)) + 'px';
+    badge.querySelector('.op-text-resize-auto').classList.toggle('op-text-resize-auto-on', isAuto);
+  }
+
+  badge.addEventListener('mousedown', e => {
+    const btn = e.target.closest('[data-step],[data-auto]');
+    if (!btn) return;
+    e.preventDefault(); e.stopPropagation();
+    snapshot();
+    if (btn.dataset.auto) {
+      el.style.fontSize = '';
+    } else {
+      const next = Math.max(8, Math.round(readPx() + parseInt(btn.dataset.step)));
+      el.style.fontSize = next + 'px';
+    }
+    saveStyle();
+    refresh();
+  });
+
+  refresh();
+  wrap.appendChild(badge);
+  el.style.position = 'relative';
+
+  // Width handle
+  const handle = document.createElement('div');
+  handle.className = 'op-text-width-handle';
+  handle.contentEditable = 'false';
+  const tip = document.createElement('span');
+  tip.className = 'op-text-width-tip';
+  handle.appendChild(tip);
+  el.appendChild(handle);
+
+  handle.addEventListener('mousedown', e => {
+    e.preventDefault(); e.stopPropagation();
+    const startX  = e.clientX;
+    const startW  = el.getBoundingClientRect().width;
+    const parentW = el.parentElement.getBoundingClientRect().width;
+    el.classList.add('op-text-resizing');
+    function onMove(e) {
+      const pct = Math.round(Math.max(80, startW + (e.clientX - startX)) / parentW * 100);
+      el.style.maxWidth = pct + '%';
+      tip.textContent = pct + '%';
+    }
+    function onUp() {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      el.classList.remove('op-text-resizing');
+      if (el.style.maxWidth) { snapshot(); saveStyle(); }
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+
+  handle.addEventListener('dblclick', e => {
+    e.stopPropagation();
+    snapshot();
+    el.style.maxWidth = '';
+    tip.textContent = 'auto';
+    saveStyle();
   });
 }
 
