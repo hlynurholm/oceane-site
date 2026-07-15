@@ -11,15 +11,21 @@
     "media": [
       {
         "type": "image",
-        "src": "ISB---Gulli-Arnars---HHH04556.webp"
+        "src": "ISB---Gulli-Arnars---HHH04556.webp",
+        "width": 2400,
+        "height": 1600
       },
       {
         "type": "image",
-        "src": "ISB---Gulli-Arnars---HHH04429.webp"
+        "src": "ISB---Gulli-Arnars---HHH04429.webp",
+        "width": 2400,
+        "height": 1600
       },
       {
         "type": "image",
-        "src": "ISB---Gulli-Arnars---HHH03969.webp"
+        "src": "ISB---Gulli-Arnars---HHH03969.webp",
+        "width": 2400,
+        "height": 1600
       },
       {
         "type": "video",
@@ -76,27 +82,39 @@
     "media": [
       {
         "type": "image",
-        "src": "Chitocare-Skogarboin---HH_08385.webp"
+        "src": "Chitocare-Skogarboin---HH_08385.webp",
+        "width": 2400,
+        "height": 1600
       },
       {
         "type": "image",
-        "src": "Chitocare-Skogarboin---HH_08994.webp"
+        "src": "Chitocare-Skogarboin---HH_08994.webp",
+        "width": 2400,
+        "height": 1600
       },
       {
         "type": "image",
-        "src": "Chitocare-Skogarboin---HH_08124.webp"
+        "src": "Chitocare-Skogarboin---HH_08124.webp",
+        "width": 2400,
+        "height": 1600
       },
       {
         "type": "image",
-        "src": "Chitocare-Skogarboin---HH_06748.webp"
+        "src": "Chitocare-Skogarboin---HH_06748.webp",
+        "width": 2400,
+        "height": 1600
       },
       {
         "type": "image",
-        "src": "Chitocare-Skogarboin---HH_09840.webp"
+        "src": "Chitocare-Skogarboin---HH_09840.webp",
+        "width": 2400,
+        "height": 1600
       },
       {
         "type": "image",
-        "src": "Chitocare-Skogarboin---HH_07641.webp"
+        "src": "Chitocare-Skogarboin---HH_07641.webp",
+        "width": 2400,
+        "height": 1600
       },
       {
         "type": "video",
@@ -117,16 +135,126 @@
   {
     "slug": "p5",
     "n": "04",
-    "title": "Harbor Co.",
-    "kind": "Launch spot",
+    "title": "Formula 1",
+    "kind": "Photography",
     "client": "Harbor Co.",
-    "services": "Commercial",
-    "year": "2026",
-    "description": "A 30-second launch spot for a new product line, shot in a single day on location.",
+    "services": "Social media",
+    "year": "2023-2026",
+    "description": "",
     "media": [
       {
-        "type": "video",
-        "poster": "f1-track.jpg"
+        "type": "image",
+        "src": "HHH00130.JPG.webp",
+        "width": 1600,
+        "height": 2400
+      },
+      {
+        "type": "image",
+        "src": "HHH00101.JPG.webp",
+        "width": 1600,
+        "height": 2400
+      },
+      {
+        "type": "image",
+        "src": "IMG_8945.JPG.webp",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "type": "image",
+        "src": "F1-Barcelona-50-2.JPG.webp",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "type": "image",
+        "src": "F1-Barcelona-45.JPG.webp",
+        "width": 1600,
+        "height": 2400
+      },
+      {
+        "type": "image",
+        "src": "F1-Belgium-23.JPG.webp",
+        "width": 1600,
+        "height": 2400
+      },
+      {
+        "type": "image",
+        "src": "F1-Belgium-16.JPG.webp",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "type": "image",
+        "src": "2023-Zandvoort---HHH00274-Enhanced-NR.JPG.webp",
+        "width": 1600,
+        "height": 2400
+      },
+      {
+        "type": "image",
+        "src": "2023-Zandvoort---HHH09969-2-Enhanced-NR.JPG.webp",
+        "width": 1600,
+        "height": 2400
+      },
+      {
+        "type": "image",
+        "src": "2023-Zandvoort---HHH08160.JPG.webp",
+        "width": 1600,
+        "height": 2400
+      },
+      {
+        "type": "image",
+        "src": "2023-Zandvoort---HHH03924.JPG.webp",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "type": "image",
+        "src": "PHOTOS_HHH00720-2.JPG.webp",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "type": "image",
+        "src": "Las-Vegas-GP---HHH07652-Enhanced-NR.JPG.webp",
+        "width": 1920,
+        "height": 2400
+      },
+      {
+        "type": "image",
+        "src": "Las-Vegas-GP---HHH06938-Enhanced-NR.JPG.webp",
+        "width": 1920,
+        "height": 2400
+      },
+      {
+        "type": "image",
+        "src": "HH_08787.JPG.webp",
+        "width": 1600,
+        "height": 2400
+      },
+      {
+        "type": "image",
+        "src": "HH_00208.JPG.webp",
+        "width": 1600,
+        "height": 2400
+      },
+      {
+        "type": "image",
+        "src": "HHH00841-Enhanced-NR-1.webp",
+        "width": 1080,
+        "height": 1350
+      },
+      {
+        "type": "image",
+        "src": "IMG_0870_Original.webp",
+        "width": 1080,
+        "height": 1350
+      },
+      {
+        "type": "image",
+        "src": "edited---HHH08113.webp",
+        "width": 1600,
+        "height": 2400
       }
     ]
   }
