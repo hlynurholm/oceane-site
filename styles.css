@@ -71,7 +71,7 @@ a{text-decoration:none}
 .op-d-meta-item{display:flex;flex-direction:column;gap:4px}
 .op-d-meta-label{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#9c927c}
 .op-d-meta-value{font-size:15px;color:#201e1a}
-.op-d-desc p{font-family:'DM Serif Display',serif;font-weight:400;font-size:clamp(22px,2.4vw,32px);line-height:1.35;color:#201e1a;max-width:900px;margin:0}
+.op-d-desc p{font-family:'DM Sans',sans-serif;font-size:clamp(22px,2.4vw,32px);line-height:1.35;color:#201e1a;max-width:900px;margin:0}
 .op-d-gallery{max-width:1200px;margin:0 auto;padding:32px clamp(20px,4vw,56px) 64px;display:flex;flex-direction:column;gap:24px}
 .op-d-images{display:grid;gap:16px}
 .op-d-images .op-img-cell{position:relative}
