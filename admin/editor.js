@@ -512,7 +512,9 @@ function attachProjectEditing() {
     const v = await pickFromStream();
     if (!v) return;
     snapshot();
-    proj.media.push({ type: 'video', streamUid: v.uid, poster: v.thumbnail || '', url: '' });
+    const entry = { type: 'video', streamUid: v.uid, poster: v.thumbnail || '', url: '' };
+    if (v.width && v.height) { entry.width = v.width; entry.height = v.height; }
+    proj.media.push(entry);
     markDirty();
     reRenderProject(proj);
   };
@@ -1076,15 +1078,19 @@ $('stream-upload-btn').addEventListener('click', () => {
       });
 
       bar.style.width = '100%';
-      status.textContent = '✓ Uploaded — processing…';
+      status.textContent = '✓ Uploaded — fetching info…';
 
-      // Immediately resolve with the new uid so it can be added to the project.
-      // CF processes the video async so thumbnail won't exist yet.
+      // Fetch dimensions from CF (give it a moment to register the upload)
+      const resolved = { uid, name: file.name, thumbnail: '' };
+      try {
+        await new Promise(r => setTimeout(r, 2000));
+        const dr = await fetch(`/api/stream-video/${uid}`);
+        const dd = await dr.json();
+        if (dd.width && dd.height) { resolved.width = dd.width; resolved.height = dd.height; }
+      } catch {}
+
       streamModal.hidden = true;
-      if (_streamResolve) {
-        _streamResolve({ uid, name: file.name, thumbnail: '' });
-        _streamResolve = null;
-      }
+      if (_streamResolve) { _streamResolve(resolved); _streamResolve = null; }
     } catch (e) {
       status.textContent = 'Error: ' + e.message;
     } finally {

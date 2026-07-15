@@ -86,8 +86,11 @@ function opVideoBlockHtml(item, idx) {
   if (item.streamUid) {
     var src = 'https://iframe.videodelivery.net/' + item.streamUid +
               '?controls=true&muted=false&autoplay=false&loop=false&preload=metadata';
+    var arStyle = (item.width && item.height)
+      ? ' style="aspect-ratio:' + item.width + '/' + item.height + '"'
+      : '';
     return '' +
-      '<div class="op-d-video op-d-stream"' + idxAttr + '>' +
+      '<div class="op-d-video op-d-stream"' + idxAttr + arStyle + '>' +
         '<iframe src="' + src + '" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="border:none;width:100%;height:100%;position:absolute;inset:0"></iframe>' +
       '</div>';
   }

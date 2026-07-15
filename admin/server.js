@@ -158,8 +158,25 @@ app.get('/api/stream-videos', async (req, res) => {
       name:      v.meta?.name || v.uid,
       thumbnail: v.thumbnail,
       duration:  v.duration,
+      width:     v.input?.width,
+      height:    v.input?.height,
     }));
     res.json({ configured: true, videos });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/stream-video/:uid', async (req, res) => {
+  const cfg = getCfConfig();
+  if (!cfg) return res.status(400).json({ error: 'CF not configured' });
+  try {
+    const r = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${cfg.accountId}/stream/${req.params.uid}`,
+      { headers: { Authorization: `Bearer ${cfg.apiToken}` } }
+    );
+    const data = await r.json();
+    if (!data.success) return res.status(502).json({ error: data.errors?.[0]?.message || 'CF error' });
+    const v = data.result;
+    res.json({ uid: v.uid, width: v.input?.width, height: v.input?.height });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

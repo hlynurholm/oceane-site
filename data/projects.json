@@ -25,7 +25,9 @@
         "type": "video",
         "streamUid": "6582f77f0d2f6c482f13a09c01b66600",
         "poster": "https://customer-glfted1bbx13jo4x.cloudflarestream.com/6582f77f0d2f6c482f13a09c01b66600/thumbnails/thumbnail.jpg",
-        "url": ""
+        "url": "",
+        "width": 1920,
+        "height": 1080
       }
     ],
     "bgPosition": "58.2% 35.0%",
