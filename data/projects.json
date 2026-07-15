@@ -130,7 +130,10 @@
         "maxWidth": "100%"
       }
     },
-    "bgPosition": "39.0% 43.1%"
+    "bgPosition": "39.0% 43.1%",
+    "coverStreamUid": "bfa35b1c8e4cdbf59520de91cf4bbed8",
+    "coverWidth": 3840,
+    "coverHeight": 1744
   },
   {
     "slug": "p5",
@@ -144,7 +147,7 @@
     "media": [
       {
         "type": "image",
-        "src": "HHH00130.JPG.webp",
+        "src": "2023-Zandvoort---HHH03924.JPG.webp",
         "width": 1600,
         "height": 2400
       },
@@ -256,6 +259,7 @@
         "width": 1600,
         "height": 2400
       }
-    ]
+    ],
+    "bgPosition": "42.2% 30.6%"
   }
 ]
