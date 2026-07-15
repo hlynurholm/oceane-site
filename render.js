@@ -147,7 +147,6 @@ function opRenderDetail() {
         '<div class="op-d-client" data-op-field="title"' + opFs(proj,'title') + '>' + proj.title + '</div>' +
         '<div class="op-d-title" data-op-field="kind"' + opFs(proj,'kind') + '>' + proj.kind + '</div>' +
         '<div class="op-d-meta-row">' +
-          '<div class="op-d-meta-item"><span class="op-d-meta-label">Client</span><span class="op-d-meta-value" data-op-field="client">' + proj.client + '</span></div>' +
           '<div class="op-d-meta-item"><span class="op-d-meta-label">Services</span><span class="op-d-meta-value" data-op-field="services">' + proj.services + '</span></div>' +
           '<div class="op-d-meta-item"><span class="op-d-meta-label">Year</span><span class="op-d-meta-value" data-op-field="year">' + proj.year + '</span></div>' +
         '</div>' +
