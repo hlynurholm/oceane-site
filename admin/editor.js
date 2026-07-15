@@ -777,7 +777,12 @@ function makeProjectEditable(el, proj, field) {
   if (!el) return;
   el.contentEditable = 'true';
   el._opFocus = () => snapshot();
-  el._opInput = () => { proj[field] = el.innerText.trim(); markDirty(); };
+  el._opInput = () => {
+    const clone = el.cloneNode(true);
+    clone.querySelectorAll('.op-text-resize-badge,.op-text-width-handle').forEach(n => n.remove());
+    proj[field] = clone.innerText.trim();
+    markDirty();
+  };
   el.addEventListener('focus', el._opFocus);
   el.addEventListener('input', el._opInput);
 }
