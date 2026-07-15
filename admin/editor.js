@@ -8,6 +8,9 @@ let projects = [];
 let indexEdits = [];  // [{selector, html?, attr?}] for index.html
 let history = [];
 let staticEditingAttached = false;
+let mobileEditMode = false;
+const mobileRefreshFns = [];
+let currentPhoneIdx = 0;
 
 // ── Toolbar ───────────────────────────────────────────────────────────────────
 const bar = document.createElement('div');
@@ -17,6 +20,7 @@ bar.innerHTML = `
   <div class="op-edit-sep"></div>
   <button class="op-edit-btn op-edit-toggle" id="op-toggle">Edit</button>
   <button class="op-edit-btn op-edit-btn-green" id="op-new-project">+ New Project</button>
+  <button class="op-edit-btn" id="op-mob-btn">Phone</button>
   <div class="op-edit-spacer"></div>
   <button class="op-edit-btn" id="op-undo" disabled title="Undo (⌘Z)">Undo</button>
   <button class="op-edit-btn op-edit-btn-primary" id="op-save">Save</button>
@@ -174,6 +178,31 @@ const toast = document.createElement('div');
 toast.id = 'op-toast';
 document.body.appendChild(toast);
 
+// ── Mobile preview panel ──────────────────────────────────────────────────────
+const PHONES = [
+  { label: 'iPhone 17 Pro Max',      w: 440, h: 956 },
+  { label: 'iPhone 17 Pro',          w: 393, h: 852 },
+  { label: 'iPhone 17 Plus',         w: 430, h: 932 },
+  { label: 'iPhone 17',              w: 393, h: 852 },
+  { label: 'Samsung S25 Ultra',      w: 412, h: 915 },
+  { label: 'Samsung S25',            w: 360, h: 780 },
+  { label: 'Galaxy Fold 8 (closed)', w: 373, h: 844 },
+  { label: 'Galaxy Fold 8 (open)',   w: 748, h: 847 },
+];
+
+const mobilePanel = document.createElement('div');
+mobilePanel.id = 'op-mobile-panel';
+mobilePanel.hidden = true;
+mobilePanel.innerHTML =
+  '<div id="op-mob-ph">' +
+    '<select id="op-phone-sel">' + PHONES.map((p,i) => `<option value="${i}">${p.label}</option>`).join('') + '</select>' +
+    '<button class="op-edit-btn" id="op-mob-edit">Edit mobile</button>' +
+    '<button class="op-edit-btn" id="op-mob-refresh" title="Reload preview">↻</button>' +
+    '<button class="op-edit-btn" id="op-mob-close">✕</button>' +
+  '</div>' +
+  '<div id="op-mob-fw"><div id="op-mob-frame"><iframe id="op-mob-iframe" src="about:blank"></iframe></div></div>';
+document.body.appendChild(mobilePanel);
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 async function init() {
   // Backfill any image items missing dimensions, then load fresh data
@@ -249,9 +278,30 @@ document.addEventListener('keydown', e => {
 
 window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
 
+// ── Mobile panel events ───────────────────────────────────────────────────────
+const mobBtn    = $('op-mob-btn');
+const mobEdit   = $('op-mob-edit');
+const phoneSel  = $('op-phone-sel');
+const mobIframe = $('op-mob-iframe');
+
+mobBtn.addEventListener('click', () => {
+  mobilePanel.hidden = !mobilePanel.hidden;
+  if (!mobilePanel.hidden) loadMobileIframe();
+});
+$('op-mob-close').addEventListener('click', () => { mobilePanel.hidden = true; setMobileEditMode(false); });
+$('op-mob-refresh').addEventListener('click', loadMobileIframe);
+phoneSel.addEventListener('change', () => {
+  currentPhoneIdx = parseInt(phoneSel.value);
+  scaleMobileFrame();
+  loadMobileIframe();
+});
+mobEdit.addEventListener('click', () => setMobileEditMode(!mobileEditMode));
+mobIframe.addEventListener('load', () => { scaleMobileFrame(); syncMobileStylesToIframe(); });
+
 // ── Edit mode ─────────────────────────────────────────────────────────────────
 function enterEditMode() {
   editMode = true;
+  mobileRefreshFns.length = 0;
   toggleBtn.textContent = 'Viewing';
   toggleBtn.classList.add('op-edit-toggle-active');
   document.body.classList.add('op-edit-mode');
@@ -424,6 +474,10 @@ function setupHomeTileEditing() {
         if (action === 'delete') { deleteProject(slug); }
       });
       tile.appendChild(controls);
+
+      // Tile title font-size control (mobile-aware via addTextResizeHandle)
+      const titleEl = tile.querySelector('[data-op-field="tileTitle"]');
+      if (titleEl) addTextResizeHandle(titleEl, proj, 'tileTitle');
     });
   });
 }
@@ -606,6 +660,7 @@ function removeMedia(proj, idx) {
 }
 
 function reRenderProject(proj) {
+  mobileRefreshFns.length = 0;
   window.__opProjectsOverride = projects;
   const root = document.getElementById('op-detail-root');
   if (root) root.innerHTML = '';
@@ -614,6 +669,7 @@ function reRenderProject(proj) {
 }
 
 function reRenderHome() {
+  mobileRefreshFns.length = 0;
   window.__opProjectsOverride = projects;
   const root = document.getElementById('op-projects');
   if (root) root.innerHTML = '';
@@ -692,15 +748,10 @@ function setFieldStyles(proj, field, styles) {
 
 // ── Text resize (font-size badge) ─────────────────────────────────────────────
 function addTextResizeHandle(el, proj, field) {
-  // Wrap el in a positioned div so the badge lives OUTSIDE the contenteditable,
-  // preventing cursor-stuck bugs when the field is emptied.
   const wrap = document.createElement('div');
   wrap.className = 'op-field-wrap';
   el.parentNode.insertBefore(wrap, el);
   wrap.appendChild(el);
-
-  // If the field is already empty, the handle (contenteditable=false) will be
-  // the only child — Chrome can't place a cursor there. A <br> fixes it.
   if (!el.textContent.trim()) el.appendChild(document.createElement('br'));
 
   const badge = document.createElement('div');
@@ -712,12 +763,22 @@ function addTextResizeHandle(el, proj, field) {
     '<button class="op-text-resize-btn op-text-resize-auto" data-auto="1">Auto</button>';
 
   function readPx() { return parseFloat(getComputedStyle(el).fontSize); }
+  function getMobileFs() {
+    if (!proj.mobileStyles || !proj.mobileStyles[field]) return null;
+    const ms = proj.mobileStyles[field];
+    return typeof ms === 'string' ? ms : ms.fontSize;
+  }
 
   function refresh() {
-    const isAuto = !el.style.fontSize;
-    badge.querySelector('.op-text-resize-val').textContent =
-      isAuto ? 'auto' : Math.round(parseFloat(el.style.fontSize)) + 'px';
-    badge.querySelector('.op-text-resize-auto').classList.toggle('op-text-resize-auto-on', isAuto);
+    if (mobileEditMode) {
+      const fs = getMobileFs();
+      badge.querySelector('.op-text-resize-val').textContent = fs ? Math.round(parseFloat(fs)) + 'px' : 'auto';
+      badge.querySelector('.op-text-resize-auto').classList.toggle('op-text-resize-auto-on', !fs);
+    } else {
+      const isAuto = !el.style.fontSize;
+      badge.querySelector('.op-text-resize-val').textContent = isAuto ? 'auto' : Math.round(parseFloat(el.style.fontSize)) + 'px';
+      badge.querySelector('.op-text-resize-auto').classList.toggle('op-text-resize-auto-on', isAuto);
+    }
   }
 
   badge.addEventListener('mousedown', e => {
@@ -725,21 +786,34 @@ function addTextResizeHandle(el, proj, field) {
     if (!btn) return;
     e.preventDefault(); e.stopPropagation();
     snapshot();
-    const styles = getFieldStyles(proj, field);
-    if (btn.dataset.auto) {
-      el.style.fontSize = '';
-      delete styles.fontSize;
+    if (mobileEditMode) {
+      if (!proj.mobileStyles) proj.mobileStyles = {};
+      if (btn.dataset.auto) {
+        delete proj.mobileStyles[field];
+      } else {
+        const curFs = getMobileFs();
+        const basePx = curFs ? parseFloat(curFs) : readPx();
+        proj.mobileStyles[field] = Math.max(8, Math.round(basePx + parseInt(btn.dataset.step))) + 'px';
+      }
+      syncMobileStylesToIframe();
     } else {
-      const next = Math.max(8, Math.round(readPx() + parseInt(btn.dataset.step)));
-      el.style.fontSize = next + 'px';
-      styles.fontSize = next + 'px';
+      const styles = getFieldStyles(proj, field);
+      if (btn.dataset.auto) {
+        el.style.fontSize = '';
+        delete styles.fontSize;
+      } else {
+        const next = Math.max(8, Math.round(readPx() + parseInt(btn.dataset.step)));
+        el.style.fontSize = next + 'px';
+        styles.fontSize = next + 'px';
+      }
+      setFieldStyles(proj, field, styles);
     }
-    setFieldStyles(proj, field, styles);
     refresh();
     markDirty();
   });
 
   refresh();
+  mobileRefreshFns.push(refresh);
   wrap.appendChild(badge);
   el.style.position = 'relative';
   addTextWidthHandle(el, proj, field);
@@ -1390,6 +1464,53 @@ async function loadSnapsPanel() {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function markDirty() { dirty = true; }
+
+function setMobileEditMode(on) {
+  mobileEditMode = on;
+  mobEdit.classList.toggle('op-mob-edit-active', on);
+  mobEdit.textContent = on ? 'Mobile ON' : 'Edit mobile';
+  mobileRefreshFns.forEach(fn => fn());
+}
+
+function loadMobileIframe() {
+  mobIframe.src = location.pathname + location.search;
+}
+
+function scaleMobileFrame() {
+  const phone = PHONES[currentPhoneIdx];
+  const wrap = document.getElementById('op-mob-fw');
+  if (!wrap) return;
+  const scale = Math.min((wrap.clientWidth - 24) / phone.w, (wrap.clientHeight - 24) / phone.h);
+  const frame = document.getElementById('op-mob-frame');
+  frame.style.width  = phone.w + 'px';
+  frame.style.height = phone.h + 'px';
+  frame.style.transform = 'scale(' + scale + ')';
+  mobIframe.style.width  = phone.w + 'px';
+  mobIframe.style.height = phone.h + 'px';
+}
+
+function generateMobileCSS(projs) {
+  const rules = [];
+  projs.forEach(p => {
+    if (!p.mobileStyles) return;
+    const ms = p.mobileStyles;
+    if (ms.tileTitle) {
+      const v = typeof ms.tileTitle === 'string' ? ms.tileTitle : ms.tileTitle.fontSize;
+      if (v) rules.push('#work-' + p.slug + ' .op-proj-title{font-size:' + v + '}');
+    }
+  });
+  return rules.length ? '@media(max-width:640px){' + rules.join('') + '}' : '';
+}
+
+function syncMobileStylesToIframe() {
+  try {
+    const iDoc = mobIframe.contentDocument;
+    if (!iDoc || !iDoc.head) return;
+    let s = iDoc.getElementById('op-mob-styles');
+    if (!s) { s = iDoc.createElement('style'); s.id = 'op-mob-styles'; iDoc.head.appendChild(s); }
+    s.textContent = generateMobileCSS(projects);
+  } catch(e) {}
+}
 
 function waitFor(selector, callback) {
   const found = document.querySelectorAll(selector);

@@ -605,3 +605,28 @@ body.op-edit-mode .op-draggable.op-active .op-drag-tooltip { opacity: 1; }
 .op-modal-textarea { resize: vertical; min-height: 90px; }
 .op-modal-input:focus, .op-modal-textarea:focus { outline: none; border-color: #1b5294; }
 .op-modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
+
+/* ── Mobile preview panel ─────────────────────────────────────────────────────── */
+#op-mobile-panel {
+  position: fixed; top: 44px; right: 0; width: 360px; bottom: 0;
+  background: #111; border-left: 1px solid rgba(255,252,249,.1);
+  z-index: 400; display: flex; flex-direction: column;
+}
+#op-mobile-panel[hidden] { display: none; }
+#op-mob-ph {
+  height: 44px; display: flex; align-items: center; gap: 6px;
+  padding: 0 10px; border-bottom: 1px solid rgba(255,252,249,.08); flex-shrink: 0;
+}
+#op-phone-sel {
+  flex: 1; min-width: 0;
+  background: rgba(255,252,249,.07); border: 1px solid rgba(255,252,249,.12);
+  color: rgba(255,252,249,.8); font-family: 'DM Sans',sans-serif; font-size: 11px;
+  border-radius: 6px; padding: 4px 6px; cursor: pointer;
+}
+#op-mob-fw {
+  flex: 1; overflow: hidden; display: flex;
+  align-items: flex-start; justify-content: center; padding: 12px;
+}
+#op-mob-frame { transform-origin: top center; flex-shrink: 0; }
+#op-mob-iframe { border: none; display: block; border-radius: 8px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,252,249,.08); }
+.op-mob-edit-active { background: #1b5294 !important; color: #fffcf9 !important; border-color: #1b5294 !important; }
