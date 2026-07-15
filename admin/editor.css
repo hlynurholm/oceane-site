@@ -155,6 +155,58 @@ body.op-edit-mode [data-op-field]:focus-within .op-text-resize-badge {
 /* Auto button highlights when currently active (no override) */
 .op-text-resize-auto-on { color: #82abcc !important; }
 
+/* ── Text width handle (right-edge drag to resize maxWidth) ─────────────────── */
+.op-text-width-handle {
+  position: absolute;
+  top: 0; right: -6px;
+  width: 12px;
+  height: 100%;
+  cursor: ew-resize;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .15s;
+  z-index: 41;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* visible strip */
+.op-text-width-handle::before {
+  content: '';
+  width: 3px;
+  height: 28px;
+  max-height: 80%;
+  background: #1b5294;
+  border-radius: 999px;
+  display: block;
+}
+body.op-edit-mode [data-op-field]:hover .op-text-width-handle,
+body.op-edit-mode .op-text-resizing .op-text-width-handle {
+  opacity: 1;
+  pointer-events: auto;
+}
+/* percentage tooltip shown while dragging */
+.op-text-width-tip {
+  position: absolute;
+  top: calc(50% - 12px);
+  left: 16px;
+  background: rgba(20,19,16,.88);
+  backdrop-filter: blur(6px);
+  color: rgba(255,252,249,.9);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .1s;
+  border: 1px solid rgba(255,252,249,.12);
+}
+.op-text-resizing .op-text-width-tip { opacity: 1; }
+/* keep the parent positioned so the handle can be absolute */
+[data-op-field] { position: relative; }
+
 /* ── Editable text highlights ───────────────────────────────────────────────── */
 body.op-edit-mode [contenteditable] {
   outline: none;

@@ -273,7 +273,7 @@ function exitEditMode() {
   });
   document.querySelectorAll(
     '.op-img-replace, .op-media-remove, .op-media-add-row, .op-tile-controls, .op-hero-controls,' +
-    '.op-video-url-btn, .op-drag-ring, .op-resize-handle, .op-drag-tooltip, .op-text-resize-badge'
+    '.op-video-url-btn, .op-drag-ring, .op-resize-handle, .op-drag-tooltip, .op-text-resize-badge, .op-text-width-handle'
   ).forEach(el => el.remove());
   document.querySelectorAll('[data-op-field]').forEach(el => { el.style.position = ''; });
   document.querySelectorAll('.op-draggable').forEach(el => {
