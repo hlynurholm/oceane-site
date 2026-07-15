@@ -1052,25 +1052,22 @@ $('stream-upload-btn').addEventListener('click', () => {
       const { uid, uploadURL, error } = await r.json();
       if (error) throw new Error(error);
 
-      // Step 2: upload directly to Cloudflare (XHR for progress events)
+      // Step 2: upload directly to Cloudflare via TUS (handles any file size)
       await new Promise((res, rej) => {
-        const form = new FormData();
-        form.append('file', file);
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', uploadURL);
-        xhr.upload.onprogress = e => {
-          if (e.lengthComputable) {
-            const pct = Math.round(e.loaded / e.total * 100);
+        const upload = new tus.Upload(file, {
+          uploadUrl: uploadURL,
+          chunkSize: 50 * 1024 * 1024,
+          retryDelays: [0, 3000, 5000, 10000],
+          metadata: { filename: file.name, filetype: file.type },
+          onProgress(sent, total) {
+            const pct = Math.round(sent / total * 100);
             bar.style.width = pct + '%';
             status.textContent = `Uploading… ${pct}%`;
-          }
-        };
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) res();
-          else rej(new Error('Upload failed: ' + xhr.status));
-        };
-        xhr.onerror = () => rej(new Error('Network error'));
-        xhr.send(form);
+          },
+          onSuccess() { res(); },
+          onError(e) { rej(new Error('Upload failed: ' + e.message)); },
+        });
+        upload.start();
       });
 
       bar.style.width = '100%';

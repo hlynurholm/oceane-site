@@ -57,7 +57,7 @@ app.use('/admin', express.static(__dirname));
 // Inject editor into HTML responses
 function injectEditor(html) {
   html = html.replace('</head>', '  <link rel="stylesheet" href="/admin/editor.css">\n</head>');
-  html = html.replace('</body>', '  <script src="/admin/editor.js"></script>\n</body>');
+  html = html.replace('</body>', '  <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4/dist/tus.min.js"></script>\n  <script src="/admin/editor.js"></script>\n</body>');
   return html;
 }
 
