@@ -176,6 +176,8 @@ document.body.appendChild(toast);
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 async function init() {
+  // Backfill any image items missing dimensions, then load fresh data
+  await fetch('/api/backfill-dimensions', { method: 'POST' }).catch(() => {});
   const r = await fetch('/api/projects');
   projects = await r.json();
   updateUndoBtn();
@@ -320,8 +322,9 @@ function setupHomeStaticEditing() {
       e.preventDefault(); e.stopPropagation();
 
       if (action === 'photo') {
-        const fn = await pickAndUpload('image/*');
-        if (!fn) return;
+        const d = await pickAndUpload('image/*');
+        if (!d) return;
+        const fn = d.filename;
         const pos = await pickFocalPoint(fn);
         const bgPos = pos || 'center';
         snapshot();
@@ -392,8 +395,9 @@ function setupHomeTileEditing() {
         e.preventDefault(); e.stopPropagation();
 
         if (action === 'cover-photo') {
-          const fn = await pickAndUpload('image/*');
-          if (!fn) return;
+          const d = await pickAndUpload('image/*');
+          if (!d) return;
+          const fn = d.filename;
           const pos = await pickFocalPoint(fn);
           snapshot();
           delete proj.coverStreamUid;
@@ -453,11 +457,12 @@ function attachProjectEditing() {
       el.classList.add('op-img-cell');
       const img = el.querySelector('img');
       addReplaceBtn(el, async () => {
-        const fn = await pickAndUpload('image/*');
-        if (!fn) return;
+        const d = await pickAndUpload('image/*');
+        if (!d) return;
         snapshot();
-        item.src = fn;
-        if (img) img.src = 'assets/photos/' + fn;
+        item.src = d.filename;
+        if (d.width) { item.width = d.width; item.height = d.height; }
+        if (img) img.src = 'assets/photos/' + d.filename;
         markDirty();
       });
       const rm = makeRemoveBtn(() => removeMedia(proj, idx));
@@ -509,10 +514,14 @@ function attachProjectEditing() {
   addPhoto.className = 'op-edit-btn op-edit-btn-primary';
   addPhoto.textContent = '+ Add photo';
   addPhoto.onclick = async () => {
-    const fns = await pickAndUploadMultiple('image/*');
-    if (!fns.length) return;
+    const results = await pickAndUploadMultiple('image/*');
+    if (!results.length) return;
     snapshot();
-    fns.forEach(fn => proj.media.push({ type: 'image', src: fn }));
+    results.forEach(d => {
+      const item = { type: 'image', src: d.filename };
+      if (d.width) { item.width = d.width; item.height = d.height; }
+      proj.media.push(item);
+    });
     markDirty();
     reRenderProject(proj);
   };
@@ -1243,7 +1252,8 @@ async function pickAndUpload(accept) {
       showToast('Uploading…');
       const r = await fetch('/api/upload', { method: 'POST', body: form });
       const d = await r.json();
-      resolve(d.filename || null);
+      // Return full result object so callers can store dimensions
+      resolve(d.filename ? d : null);
     };
     input.addEventListener('cancel', () => resolve(null));
     input.click();
@@ -1259,16 +1269,16 @@ async function pickAndUploadMultiple(accept) {
     input.onchange = async () => {
       const files = Array.from(input.files);
       if (!files.length) return resolve([]);
-      const filenames = [];
+      const results = [];
       for (let i = 0; i < files.length; i++) {
         showToast(`Uploading ${i + 1} / ${files.length}…`);
         const form = new FormData();
         form.append('file', files[i]);
         const r = await fetch('/api/upload', { method: 'POST', body: form });
         const d = await r.json();
-        if (d.filename) filenames.push(d.filename);
+        if (d.filename) results.push(d);
       }
-      resolve(filenames);
+      resolve(results);
     };
     input.addEventListener('cancel', () => resolve([]));
     input.click();

@@ -115,24 +115,8 @@
     "bgPosition": "39.0% 43.1%"
   },
   {
-    "slug": "p4",
-    "n": "04",
-    "title": "Undertow",
-    "kind": "Feature documentary",
-    "client": "Undertow Films",
-    "services": "Documentary, 4K",
-    "year": "2024",
-    "description": "A feature-length documentary on competitive free-diving, shot over fourteen months across four coastlines.",
-    "media": [
-      {
-        "type": "image",
-        "src": "coastline.jpg"
-      }
-    ]
-  },
-  {
     "slug": "p5",
-    "n": "05",
+    "n": "04",
     "title": "Harbor Co.",
     "kind": "Launch spot",
     "client": "Harbor Co.",
@@ -143,26 +127,6 @@
       {
         "type": "video",
         "poster": "f1-track.jpg"
-      }
-    ]
-  },
-  {
-    "slug": "p6",
-    "n": "06",
-    "title": "Late Bloom",
-    "kind": "Reels pack",
-    "client": "Late Bloom Studio",
-    "services": "Social",
-    "year": "2025",
-    "description": "A rolling pack of short vertical cuts for weekly posting, shot in batches alongside other productions.",
-    "media": [
-      {
-        "type": "image",
-        "src": "driver-portrait.jpg"
-      },
-      {
-        "type": "image",
-        "src": "f1-track.jpg"
       }
     ]
   }

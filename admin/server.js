@@ -46,9 +46,10 @@ async function compressAndSave(buffer, originalname) {
   }
 
   fs.writeFileSync(path.join(dest, outName), outBuffer);
+  const meta = await sharp(outBuffer).metadata();
   const inKB = Math.round(buffer.length / 1024);
   const outKB = Math.round(outBuffer.length / 1024);
-  return { filename: outName, inKB, outKB };
+  return { filename: outName, width: meta.width, height: meta.height, inKB, outKB };
 }
 
 // Serve admin static files at /admin/
@@ -80,6 +81,25 @@ app.get('/api/projects', (req, res) => {
   res.json(JSON.parse(fs.readFileSync(path.join(SITE, 'data', 'projects.json'), 'utf8')));
 });
 
+// Backfill missing width/height for image media items from disk
+app.post('/api/backfill-dimensions', async (req, res) => {
+  const fp = path.join(SITE, 'data', 'projects.json');
+  const projects = JSON.parse(fs.readFileSync(fp, 'utf8'));
+  let filled = 0;
+  for (const proj of projects) {
+    for (const item of (proj.media || [])) {
+      if (item.type === 'image' && item.src && (!item.width || !item.height)) {
+        try {
+          const meta = await sharp(path.join(SITE, 'assets', 'photos', item.src)).metadata();
+          item.width = meta.width; item.height = meta.height; filled++;
+        } catch {}
+      }
+    }
+  }
+  fs.writeFileSync(fp, JSON.stringify(projects, null, 2));
+  res.json({ ok: true, filled });
+});
+
 app.post('/api/save-projects', (req, res) => {
   try {
     fs.writeFileSync(path.join(SITE, 'data', 'projects.json'), JSON.stringify(req.body, null, 2));
@@ -107,7 +127,7 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
   try {
     const result = await compressAndSave(req.file.buffer, req.file.originalname);
     console.log(`  Upload: ${req.file.originalname} ${result.inKB}KB → ${result.outName || result.filename} ${result.outKB}KB`);
-    res.json({ ok: true, filename: result.filename });
+    res.json({ ok: true, filename: result.filename, width: result.width, height: result.height });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
