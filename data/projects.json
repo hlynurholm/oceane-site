@@ -43,9 +43,23 @@
     "client": "Epicbet",
     "services": "Commercial",
     "year": "2026",
-    "description": "",
-    "media": [],
-    "styles": {}
+    "description": "A FIFA World Cup advetisement for the online betting copmany Epicbet. With comedy and quality as our hallmarks, this Epicbet spot proves you don't need a big crew to land a big laugh.",
+    "media": [
+      {
+        "type": "video",
+        "streamUid": "58869d734e378f050aa4f927710bf587",
+        "poster": "https://customer-glfted1bbx13jo4x.cloudflarestream.com/58869d734e378f050aa4f927710bf587/thumbnails/thumbnail.jpg",
+        "url": "",
+        "width": 3088,
+        "height": 2160
+      }
+    ],
+    "styles": {
+      "description": {
+        "maxWidth": "104%",
+        "fontSize": "28px"
+      }
+    }
   },
   {
     "slug": "p3",
