@@ -28,23 +28,21 @@
         "url": ""
       }
     ],
-    "bgPosition": "58.2% 35.0%"
+    "bgPosition": "58.2% 35.0%",
+    "styles": {
+      "description": "30px"
+    }
   },
   {
     "slug": "p2",
     "n": "02",
-    "title": "Salt & Stone",
-    "kind": "Documentary series",
-    "client": "Salt & Stone Collective",
-    "services": "Documentary",
-    "year": "2025",
-    "description": "A three-part series following a coastal restoration crew through one full season, cut down from about 40 hours of footage.",
-    "media": [
-      {
-        "type": "video",
-        "poster": "driver-portrait.jpg"
-      }
-    ]
+    "title": "Epicbet\n−\nauto\n+\nAuto",
+    "kind": "FIFA World Cup\n−\nauto\n+\nAuto",
+    "client": "Epicbet",
+    "services": "Commercial",
+    "year": "2026",
+    "description": "−\nauto\n+\nAuto",
+    "media": []
   },
   {
     "slug": "p3",

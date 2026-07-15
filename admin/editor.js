@@ -653,7 +653,21 @@ function renumberProjects() {
   projects.forEach((p, i) => { p.n = String(i + 1).padStart(2, '0'); });
 }
 
-// ── Text resize ───────────────────────────────────────────────────────────────
+// ── Text style helpers ────────────────────────────────────────────────────────
+function getFieldStyles(proj, field) {
+  if (!proj.styles) proj.styles = {};
+  const s = proj.styles[field];
+  if (!s) return {};
+  return typeof s === 'string' ? { fontSize: s } : Object.assign({}, s);
+}
+function setFieldStyles(proj, field, styles) {
+  if (!proj.styles) proj.styles = {};
+  const keys = Object.keys(styles).filter(k => styles[k]);
+  if (!keys.length) { delete proj.styles[field]; return; }
+  proj.styles[field] = keys.length === 1 && keys[0] === 'fontSize' ? styles.fontSize : styles;
+}
+
+// ── Text resize (font-size badge) ─────────────────────────────────────────────
 function addTextResizeHandle(el, proj, field) {
   el.style.position = 'relative';
 
@@ -679,22 +693,74 @@ function addTextResizeHandle(el, proj, field) {
     if (!btn) return;
     e.preventDefault(); e.stopPropagation();
     snapshot();
+    const styles = getFieldStyles(proj, field);
     if (btn.dataset.auto) {
       el.style.fontSize = '';
-      if (proj.styles) delete proj.styles[field];
+      delete styles.fontSize;
     } else {
-      const step = parseInt(btn.dataset.step);
-      const next = Math.max(8, Math.round(readPx() + step));
+      const next = Math.max(8, Math.round(readPx() + parseInt(btn.dataset.step)));
       el.style.fontSize = next + 'px';
-      if (!proj.styles) proj.styles = {};
-      proj.styles[field] = next + 'px';
+      styles.fontSize = next + 'px';
     }
+    setFieldStyles(proj, field, styles);
     refresh();
     markDirty();
   });
 
   refresh();
   el.appendChild(badge);
+  addTextWidthHandle(el, proj, field);
+}
+
+// ── Text width (right-edge drag handle) ───────────────────────────────────────
+function addTextWidthHandle(el, proj, field) {
+  const handle = document.createElement('div');
+  handle.className = 'op-text-width-handle';
+  const tip = document.createElement('span');
+  tip.className = 'op-text-width-tip';
+  handle.appendChild(tip);
+  el.appendChild(handle);
+
+  handle.addEventListener('mousedown', e => {
+    e.preventDefault(); e.stopPropagation();
+    const startX    = e.clientX;
+    const startW    = el.getBoundingClientRect().width;
+    const parentW   = el.parentElement.getBoundingClientRect().width;
+    el.classList.add('op-text-resizing');
+
+    function onMove(e) {
+      const w   = Math.max(80, startW + (e.clientX - startX));
+      const pct = Math.round(w / parentW * 100);
+      el.style.maxWidth = pct + '%';
+      tip.textContent   = pct + '%';
+    }
+    function onUp() {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      el.classList.remove('op-text-resizing');
+      if (el.style.maxWidth) {
+        snapshot();
+        const styles = getFieldStyles(proj, field);
+        styles.maxWidth = el.style.maxWidth;
+        setFieldStyles(proj, field, styles);
+        markDirty();
+      }
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+
+  // Double-click to reset width to auto
+  handle.addEventListener('dblclick', e => {
+    e.stopPropagation();
+    snapshot();
+    el.style.maxWidth = '';
+    const styles = getFieldStyles(proj, field);
+    delete styles.maxWidth;
+    setFieldStyles(proj, field, styles);
+    tip.textContent = 'auto';
+    markDirty();
+  });
 }
 
 // ── Editable text ─────────────────────────────────────────────────────────────

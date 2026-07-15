@@ -1,6 +1,12 @@
 function opFs(proj, field) {
   var s = proj.styles && proj.styles[field];
-  return s ? ' style="font-size:' + s + '"' : '';
+  if (!s) return '';
+  // legacy: stored as plain string (font-size only)
+  if (typeof s === 'string') return ' style="font-size:' + s + '"';
+  var parts = [];
+  if (s.fontSize) parts.push('font-size:' + s.fontSize);
+  if (s.maxWidth) parts.push('max-width:' + s.maxWidth);
+  return parts.length ? ' style="' + parts.join(';') + '"' : '';
 }
 
 function opGroupMedia(items) {
