@@ -509,10 +509,10 @@ function attachProjectEditing() {
   addPhoto.className = 'op-edit-btn op-edit-btn-primary';
   addPhoto.textContent = '+ Add photo';
   addPhoto.onclick = async () => {
-    const fn = await pickAndUpload('image/*');
-    if (!fn) return;
+    const fns = await pickAndUploadMultiple('image/*');
+    if (!fns.length) return;
     snapshot();
-    proj.media.push({ type: 'image', src: fn });
+    fns.forEach(fn => proj.media.push({ type: 'image', src: fn }));
     markDirty();
     reRenderProject(proj);
   };
@@ -1246,6 +1246,31 @@ async function pickAndUpload(accept) {
       resolve(d.filename || null);
     };
     input.addEventListener('cancel', () => resolve(null));
+    input.click();
+  });
+}
+
+async function pickAndUploadMultiple(accept) {
+  return new Promise(resolve => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = accept || 'image/*';
+    input.multiple = true;
+    input.onchange = async () => {
+      const files = Array.from(input.files);
+      if (!files.length) return resolve([]);
+      const filenames = [];
+      for (let i = 0; i < files.length; i++) {
+        showToast(`Uploading ${i + 1} / ${files.length}…`);
+        const form = new FormData();
+        form.append('file', files[i]);
+        const r = await fetch('/api/upload', { method: 'POST', body: form });
+        const d = await r.json();
+        if (d.filename) filenames.push(d.filename);
+      }
+      resolve(filenames);
+    };
+    input.addEventListener('cancel', () => resolve([]));
     input.click();
   });
 }
