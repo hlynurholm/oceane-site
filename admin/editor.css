@@ -213,6 +213,7 @@ body.op-edit-mode [contenteditable] {
   cursor: text;
   border-radius: 3px;
   transition: box-shadow .15s;
+  min-height: 1.2em;
 }
 body.op-edit-mode [contenteditable]:hover {
   box-shadow: 0 0 0 2px rgba(27,82,148,.4);
