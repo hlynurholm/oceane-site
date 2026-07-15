@@ -170,6 +170,14 @@ body.op-edit-mode .op-field-wrap:focus-within .op-text-resize-badge {
   align-items: center;
   justify-content: center;
 }
+.op-text-width-handle--left {
+  right: auto;
+  left: -6px;
+}
+.op-text-width-handle--left .op-text-width-tip {
+  left: auto;
+  right: 16px;
+}
 /* visible strip */
 .op-text-width-handle::before {
   content: '';
@@ -611,7 +619,17 @@ body.op-edit-mode .op-draggable.op-active .op-drag-tooltip { opacity: 1; }
   position: fixed; top: 44px; right: 0; width: 360px; bottom: 0;
   background: #111; border-left: 1px solid rgba(255,252,249,.1);
   z-index: 400; display: flex; flex-direction: column;
+  min-width: 260px; max-width: 80vw;
 }
+#op-mob-resize {
+  position: absolute; top: 0; left: -4px; width: 8px; height: 100%;
+  cursor: ew-resize; z-index: 1;
+}
+#op-mob-resize::after {
+  content: ''; position: absolute; top: 0; left: 3px; width: 2px; height: 100%;
+  background: rgba(255,252,249,.08); transition: background .15s;
+}
+#op-mob-resize:hover::after, #op-mob-resize.op-mob-dragging::after { background: #1b5294; }
 #op-mobile-panel[hidden] { display: none; }
 #op-mob-ph {
   height: 44px; display: flex; align-items: center; gap: 6px;

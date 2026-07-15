@@ -194,6 +194,7 @@ const mobilePanel = document.createElement('div');
 mobilePanel.id = 'op-mobile-panel';
 mobilePanel.hidden = true;
 mobilePanel.innerHTML =
+  '<div id="op-mob-resize"></div>' +
   '<div id="op-mob-ph">' +
     '<select id="op-phone-sel">' + PHONES.map((p,i) => `<option value="${i}">${p.label}</option>`).join('') + '</select>' +
     '<button class="op-edit-btn" id="op-mob-edit">Edit mobile</button>' +
@@ -202,6 +203,27 @@ mobilePanel.innerHTML =
   '</div>' +
   '<div id="op-mob-fw"><div id="op-mob-frame"><iframe id="op-mob-iframe" src="about:blank"></iframe></div></div>';
 document.body.appendChild(mobilePanel);
+
+// Panel resize handle
+const mobResizeHandle = $('op-mob-resize');
+mobResizeHandle.addEventListener('mousedown', e => {
+  e.preventDefault();
+  mobResizeHandle.classList.add('op-mob-dragging');
+  const startX = e.clientX;
+  const startW = mobilePanel.offsetWidth;
+  function onMove(e) {
+    const newW = Math.max(260, Math.min(window.innerWidth * 0.8, startW - (e.clientX - startX)));
+    mobilePanel.style.width = newW + 'px';
+    scaleMobileFrame();
+  }
+  function onUp() {
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    mobResizeHandle.classList.remove('op-mob-dragging');
+  }
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+});
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 async function init() {
@@ -328,6 +350,7 @@ function exitEditMode() {
     '.op-video-url-btn, .op-drag-ring, .op-resize-handle, .op-drag-tooltip, .op-text-resize-badge, .op-text-width-handle'
   ).forEach(el => el.remove());
   document.querySelectorAll('[data-op-field]').forEach(el => { el.style.position = ''; el.style.maxWidth = ''; });
+  document.querySelectorAll('.op-proj-info').forEach(el => { el.style.width = ''; el.style.transform = ''; el.style.left = ''; el.style.right = ''; });
   document.querySelectorAll('.op-field-wrap').forEach(wrap => {
     const f = wrap.querySelector('[data-op-field]');
     if (f) wrap.parentNode.insertBefore(f, wrap);
@@ -428,6 +451,9 @@ function setupHomeTileEditing() {
     tiles.forEach(tile => {
       const slug = tile.id.replace('work-', '');
       const proj = projects.find(p => p.slug === slug);
+
+      // Block <a> navigation while in edit mode
+      tile.addEventListener('click', e => { if (editMode) e.preventDefault(); });
 
       const controls = document.createElement('div');
       controls.className = 'op-tile-controls';
@@ -781,6 +807,8 @@ function addTextResizeHandle(el, proj, field) {
     }
   }
 
+  badge.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); });
+
   badge.addEventListener('mousedown', e => {
     const btn = e.target.closest('[data-step],[data-auto]');
     if (!btn) return;
@@ -816,40 +844,72 @@ function addTextResizeHandle(el, proj, field) {
   mobileRefreshFns.push(refresh);
   wrap.appendChild(badge);
   el.style.position = 'relative';
-  addTextWidthHandle(el, proj, field);
+  if (field !== 'tileTitle') addTextWidthHandle(el, proj, field);
 }
 
 // ── Text width (right-edge drag handle) ───────────────────────────────────────
 function addTextWidthHandle(el, proj, field) {
+  const infoEl   = el.closest('.op-proj-info');
+  const isRight  = infoEl ? infoEl.style.textAlign === 'right' : false;
+
   const handle = document.createElement('div');
-  handle.className = 'op-text-width-handle';
+  handle.className = 'op-text-width-handle' + (isRight ? ' op-text-width-handle--left' : '');
   handle.contentEditable = 'false';
   const tip = document.createElement('span');
   tip.className = 'op-text-width-tip';
   handle.appendChild(tip);
   el.appendChild(handle);
 
+  handle.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); });
+
   handle.addEventListener('mousedown', e => {
     e.preventDefault(); e.stopPropagation();
-    const startX    = e.clientX;
-    const startW    = el.getBoundingClientRect().width;
-    const parentW   = el.parentElement.getBoundingClientRect().width;
+    const startX = e.clientX;
+    const startW = el.getBoundingClientRect().width;
     el.classList.add('op-text-resizing');
 
+    // For right-justified tiles, pre-compute the right-edge offset so we can
+    // explicitly set `left` during drag (bypassing the browser's cached-left
+    // anchor behaviour) and restore correctly on release.
+    let tileW = 0, rightGap = 0, origRight = '';
+    if (infoEl && isRight) {
+      const tileEl = el.closest('.op-proj');
+      const tileRect = tileEl ? tileEl.getBoundingClientRect() : { width: window.innerWidth, right: window.innerWidth };
+      tileW      = tileRect.width;
+      rightGap   = tileRect.right - infoEl.getBoundingClientRect().right;
+      origRight  = infoEl.style.right;
+    }
+
     function onMove(e) {
-      const w   = Math.max(80, startW + (e.clientX - startX));
-      const pct = Math.round(w / parentW * 100);
-      el.style.maxWidth = pct + '%';
-      tip.textContent   = pct + '%';
+      const delta = isRight ? -(e.clientX - startX) : (e.clientX - startX);
+      const w = Math.round(Math.max(80, startW + delta));
+      el.style.width = w + 'px';
+      if (infoEl) {
+        infoEl.style.width = w + 'px';
+        if (isRight) {
+          // Pin the right edge by explicitly computing left each frame.
+          infoEl.style.right = 'auto';
+          infoEl.style.left  = Math.round(tileW - rightGap - w) + 'px';
+        }
+      }
+      tip.textContent = w + 'px';
     }
     function onUp() {
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
       el.classList.remove('op-text-resizing');
-      if (el.style.maxWidth) {
+      if (infoEl && isRight) {
+        // Restore right-anchor CSS; left will be auto-computed identically.
+        infoEl.style.right = origRight;
+        infoEl.style.left  = '';
+        // Keep infoEl.style.width so the browser's fresh layout is also
+        // right-anchored (not shrink-to-fit which re-anchors from the left).
+      }
+      if (el.style.width) {
         snapshot();
         const styles = getFieldStyles(proj, field);
-        styles.maxWidth = el.style.maxWidth;
+        styles.width = el.style.width;
+        delete styles.maxWidth;
         setFieldStyles(proj, field, styles);
         markDirty();
       }
@@ -862,8 +922,10 @@ function addTextWidthHandle(el, proj, field) {
   handle.addEventListener('dblclick', e => {
     e.stopPropagation();
     snapshot();
-    el.style.maxWidth = '';
+    el.style.width = '';
+    if (infoEl) infoEl.style.width = '';
     const styles = getFieldStyles(proj, field);
+    delete styles.width;
     delete styles.maxWidth;
     setFieldStyles(proj, field, styles);
     tip.textContent = 'auto';
@@ -1508,7 +1570,7 @@ function syncMobileStylesToIframe() {
     if (!iDoc || !iDoc.head) return;
     let s = iDoc.getElementById('op-mob-styles');
     if (!s) { s = iDoc.createElement('style'); s.id = 'op-mob-styles'; iDoc.head.appendChild(s); }
-    s.textContent = generateMobileCSS(projects);
+    s.textContent = '#op-edit-bar{display:none!important}body{padding-top:0!important}' + generateMobileCSS(projects);
   } catch(e) {}
 }
 

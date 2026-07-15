@@ -40,9 +40,9 @@ a{text-decoration:none}
 .op-proj-n-dot{width:8px;height:8px;border-radius:50%;background:#82abcc;display:inline-block;animation:opPulse 1.6s ease-in-out infinite}
 .op-proj-timecode{position:absolute;top:66px;font-size:11px;letter-spacing:.06em;color:rgba(255,252,249,.5);white-space:nowrap}
 .op-proj-watermark{position:absolute;bottom:-6vw;font-family:'DM Serif Display',serif;font-size:24vw;line-height:1;color:#fffcf9;opacity:.07;pointer-events:none}
-.op-proj-info{position:absolute;bottom:56px;max-width:560px}
+.op-proj-info{position:absolute;bottom:56px}
 .op-proj-rule{width:36px;height:1.5px;background:#82abcc;margin-bottom:18px}
-.op-proj-title{font-family:'DM Serif Display',serif;font-weight:400;font-size:clamp(40px,6vw,96px);line-height:1;color:#fffcf9;margin:0}
+.op-proj-title{font-family:'DM Serif Display',serif;font-weight:400;font-size:clamp(40px,6vw,96px);line-height:1;color:#fffcf9;margin:0;white-space:nowrap}
 .op-proj-kind{font-size:16px;color:rgba(255,252,249,.75);margin-top:14px}
 .op-footer{position:relative;overflow:hidden;min-height:100vh;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:0 clamp(20px,4vw,56px);background:#141310}
 .op-footer-dotgrid{position:absolute;inset:0;background-image:radial-gradient(rgba(255,252,249,.22) 1.5px,transparent 1.5px);background-size:24px 24px;pointer-events:none}
@@ -88,6 +88,10 @@ a{text-decoration:none}
 .op-d-nav a{font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:#59544a}
 .op-d-nav a:hover{color:#1b5294}
 @media (max-width:640px){.op-d-client{font-size:36px}}
+@media(max-width:640px){
+  .op-hero-logo{height:clamp(20px,5vw,30px)}
+  .op-hero-vignette{background:radial-gradient(ellipse 160% 40% at 50% 40%,rgba(10,9,7,.5) 0%,transparent 70%)}
+}
 .op-hero-strip-wrap{position:absolute;inset:0;overflow:hidden}
 .op-hero-strip{display:flex;height:100%;width:max-content;animation:opHeroScroll linear infinite}
 @keyframes opHeroScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
