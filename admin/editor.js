@@ -275,7 +275,12 @@ function exitEditMode() {
     '.op-img-replace, .op-media-remove, .op-media-add-row, .op-tile-controls, .op-hero-controls,' +
     '.op-video-url-btn, .op-drag-ring, .op-resize-handle, .op-drag-tooltip, .op-text-resize-badge, .op-text-width-handle'
   ).forEach(el => el.remove());
-  document.querySelectorAll('[data-op-field]').forEach(el => { el.style.position = ''; });
+  document.querySelectorAll('[data-op-field]').forEach(el => { el.style.position = ''; el.style.maxWidth = ''; });
+  document.querySelectorAll('.op-field-wrap').forEach(wrap => {
+    const f = wrap.querySelector('[data-op-field]');
+    if (f) wrap.parentNode.insertBefore(f, wrap);
+    wrap.remove();
+  });
   document.querySelectorAll('.op-draggable').forEach(el => {
     el.classList.remove('op-draggable', 'op-active', 'op-dragging');
   });
@@ -671,11 +676,15 @@ function setFieldStyles(proj, field, styles) {
 
 // ── Text resize (font-size badge) ─────────────────────────────────────────────
 function addTextResizeHandle(el, proj, field) {
-  el.style.position = 'relative';
+  // Wrap el in a positioned div so the badge lives OUTSIDE the contenteditable,
+  // preventing cursor-stuck bugs when the field is emptied.
+  const wrap = document.createElement('div');
+  wrap.className = 'op-field-wrap';
+  el.parentNode.insertBefore(wrap, el);
+  wrap.appendChild(el);
 
   const badge = document.createElement('div');
   badge.className = 'op-text-resize-badge';
-  badge.contentEditable = 'false';
   badge.innerHTML =
     '<button class="op-text-resize-btn" data-step="-2">−</button>' +
     '<span class="op-text-resize-val"></span>' +
@@ -711,7 +720,8 @@ function addTextResizeHandle(el, proj, field) {
   });
 
   refresh();
-  el.appendChild(badge);
+  wrap.appendChild(badge);
+  el.style.position = 'relative';
   addTextWidthHandle(el, proj, field);
 }
 

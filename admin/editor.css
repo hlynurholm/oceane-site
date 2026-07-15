@@ -128,8 +128,8 @@ body.op-edit-mode .op-img-cell:hover > .op-img-replace {
   color: rgba(255,252,249,.6);
   user-select: none;
 }
-body.op-edit-mode [data-op-field]:hover .op-text-resize-badge,
-body.op-edit-mode [data-op-field]:focus-within .op-text-resize-badge {
+body.op-edit-mode .op-field-wrap:hover .op-text-resize-badge,
+body.op-edit-mode .op-field-wrap:focus-within .op-text-resize-badge {
   opacity: 1;
   pointer-events: auto;
 }
@@ -180,7 +180,7 @@ body.op-edit-mode [data-op-field]:focus-within .op-text-resize-badge {
   border-radius: 999px;
   display: block;
 }
-body.op-edit-mode [data-op-field]:hover .op-text-width-handle,
+body.op-edit-mode .op-field-wrap:hover .op-text-width-handle,
 body.op-edit-mode .op-text-resizing .op-text-width-handle {
   opacity: 1;
   pointer-events: auto;
@@ -204,8 +204,8 @@ body.op-edit-mode .op-text-resizing .op-text-width-handle {
   border: 1px solid rgba(255,252,249,.12);
 }
 .op-text-resizing .op-text-width-tip { opacity: 1; }
-/* keep the parent positioned so the handle can be absolute */
-[data-op-field] { position: relative; }
+/* Wrapper that positions the badge outside the contenteditable */
+.op-field-wrap { position: relative; }
 
 /* ── Editable text highlights ───────────────────────────────────────────────── */
 body.op-edit-mode [contenteditable] {
