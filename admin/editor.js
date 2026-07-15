@@ -410,6 +410,7 @@ function setupHomeTileEditing() {
           if (!v) return;
           snapshot();
           proj.coverStreamUid = v.uid;
+          if (v.width && v.height) { proj.coverWidth = v.width; proj.coverHeight = v.height; }
           markDirty();
           reRenderHome();
         }

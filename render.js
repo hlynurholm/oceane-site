@@ -39,9 +39,13 @@ function opProjTile(p, index, total) {
   if (p.coverStreamUid) {
     var src = 'https://iframe.videodelivery.net/' + p.coverStreamUid +
               '?autoplay=true&muted=true&loop=true&controls=false&preload=auto';
+    var ar  = (p.coverWidth && p.coverHeight) ? p.coverWidth / p.coverHeight : 16 / 9;
+    var wVh = (ar * 100).toFixed(4) + 'vh';
+    var hVw = (100 / ar).toFixed(4) + 'vw';
+    var iStyle = 'border:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);' +
+                 'width:' + wVh + ';height:' + hVw + ';min-width:100%;min-height:100%;pointer-events:none';
     mediaEl = '<div class="op-proj-media" style="background:#141310">' +
-                '<iframe src="' + src + '" allow="autoplay" tabindex="-1" ' +
-                'style="border:none;position:absolute;inset:0;width:100%;height:100%;pointer-events:none"></iframe>' +
+                '<iframe src="' + src + '" allow="autoplay" tabindex="-1" style="' + iStyle + '"></iframe>' +
               '</div>';
   } else {
     var cover = p.media && p.media.length
