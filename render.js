@@ -75,12 +75,73 @@ function opProjTile(p, index, total) {
     '</a>';
 }
 
+function opBuildHeroStrip(projects) {
+  var media = document.querySelector('.op-hero-media');
+  if (!media) return;
+
+  // Collect up to 5 items per project: real video iframes + images
+  var items = [];
+  projects.forEach(function(proj) {
+    var count = 0;
+    (proj.media || []).forEach(function(m) {
+      if (count >= 5) return;
+      if (m.streamUid) {
+        items.push({ type: 'video', uid: m.streamUid, ar: (m.width && m.height) ? m.width / m.height : 1.778 });
+        count++;
+      } else if (m.type === 'image' && m.src) {
+        items.push({ type: 'image', src: 'assets/photos/' + m.src, ar: (m.width && m.height) ? m.width / m.height : 1.5 });
+        count++;
+      }
+    });
+  });
+  if (!items.length) return;
+
+  // Fresh random shuffle every page load
+  for (var i = items.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = items[i]; items[i] = items[j]; items[j] = t;
+  }
+
+  var totalAR = items.reduce(function(s, it) { return s + it.ar; }, 0);
+  var duration = Math.max(40, Math.round(totalAR * 6));
+
+  function makeItem(it) {
+    if (it.type === 'video') {
+      var src = 'https://iframe.videodelivery.net/' + it.uid +
+                '?autoplay=true&muted=true&loop=true&controls=false&preload=auto';
+      return '<div class="op-hero-strip-video" style="aspect-ratio:' + it.ar.toFixed(4) + '">' +
+               '<iframe src="' + src + '" allow="autoplay" tabindex="-1"></iframe>' +
+             '</div>';
+    }
+    return '<img src="' + it.src + '" alt="">';
+  }
+
+  var inner = items.map(makeItem).join('');
+
+  // Duplicate for seamless loop; translateX(-50%) = one full copy width
+  var strip = document.createElement('div');
+  strip.className = 'op-hero-strip';
+  strip.style.animationDuration = duration + 's';
+  strip.innerHTML = inner + inner;
+
+  var wrap = document.createElement('div');
+  wrap.className = 'op-hero-strip-wrap';
+  wrap.appendChild(strip);
+
+  var bg = media.querySelector('.op-hero-media-img');
+  if (bg) bg.style.backgroundImage = '';
+  var vid = media.querySelector('.op-hero-video');
+  if (vid) vid.remove();
+  media.insertBefore(wrap, media.firstChild);
+}
+
 function opRenderHome() {
   var root = document.getElementById('op-projects');
   if (!root) return;
   opLoadProjects().then(function(projects) {
     var total = projects.length;
     root.innerHTML = projects.map(function(p, i) { return opProjTile(p, i, total); }).join('');
+    opBuildHeroStrip(projects);
   });
 }
 
