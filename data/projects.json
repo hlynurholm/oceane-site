@@ -67,26 +67,52 @@
   {
     "slug": "p3",
     "n": "03",
-    "title": "Field Notes",
-    "kind": "Social cutdowns",
+    "title": "Innsæi",
+    "kind": "Chitocate",
     "client": "Field Notes Farm",
-    "services": "Social",
+    "services": "Campaign",
     "year": "2026",
-    "description": "A season of short-form cutdowns shot alongside a single documentary shoot — same crew, same day, three different feeds.",
+    "description": "A mix of footage and photographs captured for Chitocare in the Forest Lagoon in the north of Iceland.",
     "media": [
       {
+        "type": "image",
+        "src": "Chitocare-Skogarboin---HH_08385.webp"
+      },
+      {
+        "type": "image",
+        "src": "Chitocare-Skogarboin---HH_08994.webp"
+      },
+      {
+        "type": "image",
+        "src": "Chitocare-Skogarboin---HH_08124.webp"
+      },
+      {
+        "type": "image",
+        "src": "Chitocare-Skogarboin---HH_06748.webp"
+      },
+      {
+        "type": "image",
+        "src": "Chitocare-Skogarboin---HH_09840.webp"
+      },
+      {
+        "type": "image",
+        "src": "Chitocare-Skogarboin---HH_07641.webp"
+      },
+      {
         "type": "video",
-        "poster": "garden-portrait.jpg"
-      },
-      {
-        "type": "image",
-        "src": "garden-portrait.jpg"
-      },
-      {
-        "type": "image",
-        "src": "coastline.jpg"
+        "streamUid": "bfa35b1c8e4cdbf59520de91cf4bbed8",
+        "poster": "https://customer-glfted1bbx13jo4x.cloudflarestream.com/bfa35b1c8e4cdbf59520de91cf4bbed8/thumbnails/thumbnail.jpg",
+        "url": "",
+        "width": 3840,
+        "height": 1744
       }
-    ]
+    ],
+    "styles": {
+      "description": {
+        "maxWidth": "100%"
+      }
+    },
+    "bgPosition": "39.0% 43.1%"
   },
   {
     "slug": "p4",
