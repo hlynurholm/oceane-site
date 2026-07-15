@@ -10,6 +10,7 @@ a{text-decoration:none}
 .op-hero{position:relative;overflow:hidden;min-height:100vh;background:#fffcf9;display:flex;flex-direction:column}
 .op-hero-media{position:absolute;top:0;left:0;right:0;height:50%;background:#faf6f0}
 .op-hero-media-img{position:absolute;inset:0;background-size:cover;background-position:center}
+.op-hero-video{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:177.78vh;height:56.25vw;min-width:100%;min-height:100%;border:none;pointer-events:none}
 .op-hero-vignette{position:absolute;top:0;left:0;right:0;height:50%;background:radial-gradient(ellipse at 50% 40%,rgba(10,9,7,.5) 0%,transparent 45%);pointer-events:none}
 .op-hero-dotgrid{position:absolute;top:0;left:0;right:0;height:50%;background-image:radial-gradient(rgba(255,252,249,.22) 1.5px,transparent 1.5px);background-size:22px 22px;pointer-events:none}
 .op-hero-scan{position:absolute;top:0;left:0;right:0;height:50%;background:repeating-linear-gradient(0deg,rgba(255,252,249,.05) 0px,rgba(255,252,249,.05) 1px,transparent 1px,transparent 4px);pointer-events:none;mix-blend-mode:overlay}

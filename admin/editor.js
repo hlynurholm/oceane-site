@@ -272,8 +272,8 @@ function exitEditMode() {
     if (el._opInput) el.removeEventListener('input', el._opInput);
   });
   document.querySelectorAll(
-    '.op-img-replace, .op-media-remove, .op-media-add-row, .op-tile-controls, .op-video-url-btn,' +
-    '.op-drag-ring, .op-resize-handle, .op-drag-tooltip, .op-text-resize-badge'
+    '.op-img-replace, .op-media-remove, .op-media-add-row, .op-tile-controls, .op-hero-controls,' +
+    '.op-video-url-btn, .op-drag-ring, .op-resize-handle, .op-drag-tooltip, .op-text-resize-badge'
   ).forEach(el => el.remove());
   document.querySelectorAll('[data-op-field]').forEach(el => { el.style.position = ''; });
   document.querySelectorAll('.op-draggable').forEach(el => {
@@ -292,22 +292,59 @@ function setupHomeStaticEditing() {
   makeIndexEditable(document.querySelector('.op-footer h2'), '.op-footer h2');
   makeIndexEditable(document.querySelector('.op-footer-note'), '.op-footer-note');
 
-  // Hero background — append button to .op-hero-media (position:absolute, fills top half)
+  // Hero background controls — tile-style, bottom of media area (avoids the header)
   const heroMedia = document.querySelector('.op-hero-media');
   const heroBg    = document.querySelector('.op-hero-media-img');
   if (heroMedia && heroBg) {
-    addReplaceBtn(heroMedia, async () => {
-      const fn = await pickAndUpload('image/*');
-      if (!fn) return;
-      const pos = await pickFocalPoint(fn);
-      const bgPos = pos || 'center';
-      snapshot();
-      heroBg.style.backgroundImage = `url(assets/photos/${fn})`;
-      heroBg.style.backgroundPosition = bgPos;
-      setIndexAttr('.op-hero-media-img', 'style',
-        `background-image:url(assets/photos/${fn});background-position:${bgPos}`);
-      markDirty();
+    const heroCtrl = document.createElement('div');
+    heroCtrl.className = 'op-hero-controls';
+    heroCtrl.innerHTML = `
+      <button class="op-tile-btn" data-action="photo">Photo bg</button>
+      <button class="op-tile-btn" data-action="video">Video bg</button>
+    `;
+
+    heroCtrl.addEventListener('click', async e => {
+      const action = e.target.dataset.action;
+      if (!action) return;
+      e.preventDefault(); e.stopPropagation();
+
+      if (action === 'photo') {
+        const fn = await pickAndUpload('image/*');
+        if (!fn) return;
+        const pos = await pickFocalPoint(fn);
+        const bgPos = pos || 'center';
+        snapshot();
+        heroBg.style.backgroundImage = `url(assets/photos/${fn})`;
+        heroBg.style.backgroundPosition = bgPos;
+        heroMedia.querySelector('.op-hero-video')?.remove();
+        setIndexHtml('.op-hero-media',
+          `<div class="op-hero-media-img" style="background-image:url(assets/photos/${fn});background-position:${bgPos}"></div>`);
+        markDirty();
+      }
+
+      if (action === 'video') {
+        const v = await pickFromStream();
+        if (!v) return;
+        snapshot();
+        const src = `https://iframe.videodelivery.net/${v.uid}?autoplay=true&muted=true&loop=true&controls=false&preload=auto`;
+        let iframe = heroMedia.querySelector('.op-hero-video');
+        if (!iframe) {
+          iframe = document.createElement('iframe');
+          iframe.className = 'op-hero-video';
+          iframe.setAttribute('allow', 'autoplay');
+          iframe.setAttribute('tabindex', '-1');
+          heroMedia.appendChild(iframe);
+        }
+        iframe.src = src;
+        const bgStyle = heroBg.getAttribute('style') || '';
+        setIndexHtml('.op-hero-media',
+          `<div class="op-hero-media-img" style="${bgStyle}"></div>` +
+          `<iframe class="op-hero-video" src="${src}" allow="autoplay" tabindex="-1"></iframe>`);
+        markDirty();
+      }
     });
+
+    heroMedia.appendChild(heroCtrl);
   }
 
   // Draggable + resizable overlay elements
