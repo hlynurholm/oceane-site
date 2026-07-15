@@ -121,13 +121,20 @@ function opImagesBlockHtml(items, idxs) {
   // Greedy row packing: accumulate images until total AR hits target (~2.8).
   // Each row gets padding-bottom = 100/totalAR % so every cell's AR exactly
   // matches the image — no uniform columns, varied compositions, no cropping.
+  // Shuffle using seeded deterministic order (slug as seed keeps it stable on reload)
+  var slots = items.map(function(it, i) {
+    return { it: it, ar: (it.width && it.height) ? it.width / it.height : 1.5, idx: idxs ? idxs[i] : i };
+  });
+  for (var si = slots.length - 1; si > 0; si--) {
+    var sj = Math.abs(Math.sin(si * 9301 + 49297) * 233280 | 0) % (si + 1);
+    var tmp = slots[si]; slots[si] = slots[sj]; slots[sj] = tmp;
+  }
+
   var TARGET = 2.8;
   var rows = [];
   var cur = [], curAR = 0;
-  items.forEach(function(it, i) {
-    var ar = (it.width && it.height) ? it.width / it.height : 1.5;
-    cur.push({ it: it, ar: ar, idx: idxs ? idxs[i] : i });
-    curAR += ar;
+  slots.forEach(function(s) {
+    cur.push(s); curAR += s.ar;
     if (curAR >= TARGET || cur.length >= 4) {
       rows.push({ slots: cur.slice(), totalAR: curAR });
       cur = []; curAR = 0;
@@ -135,8 +142,7 @@ function opImagesBlockHtml(items, idxs) {
   });
   if (cur.length) rows.push({ slots: cur, totalAR: curAR });
 
-  return rows.map(function(row) {
-    // Cap height so an underfull last row (e.g. single portrait) stays reasonable
+  var rowsHtml = rows.map(function(row) {
     var pct = Math.min(100 / row.totalAR, 72).toFixed(3);
     var cells = row.slots.map(function(s) {
       return '<div class="op-img-cell" data-op-media-idx="' + s.idx + '" style="flex:' + s.ar.toFixed(4) + '">' +
@@ -145,6 +151,7 @@ function opImagesBlockHtml(items, idxs) {
     }).join('');
     return '<div class="op-d-row" style="padding-bottom:' + pct + '%"><div class="op-d-row-inner">' + cells + '</div></div>';
   }).join('');
+  return '<div class="op-d-image-group">' + rowsHtml + '</div>';
 }
 
 function opRenderDetail() {
