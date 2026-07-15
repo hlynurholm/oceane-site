@@ -675,6 +675,7 @@ function addTextResizeHandle(el, proj, field) {
 
   const badge = document.createElement('div');
   badge.className = 'op-text-resize-badge';
+  badge.contentEditable = 'false';
   badge.innerHTML =
     '<button class="op-text-resize-btn" data-step="-2">−</button>' +
     '<span class="op-text-resize-val"></span>' +
@@ -718,6 +719,7 @@ function addTextResizeHandle(el, proj, field) {
 function addTextWidthHandle(el, proj, field) {
   const handle = document.createElement('div');
   handle.className = 'op-text-width-handle';
+  handle.contentEditable = 'false';
   const tip = document.createElement('span');
   tip.className = 'op-text-width-tip';
   handle.appendChild(tip);
