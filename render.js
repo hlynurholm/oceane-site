@@ -117,14 +117,34 @@ function opImagesBlockHtml(items, idxs) {
              '<img src="assets/photos/' + items[0].src + '" alt="">' +
            '</div>';
   }
-  var cols = items.length >= 5 ? 3 : 2;
-  var cells = items.map(function(it, i) {
-    var idx = idxs ? idxs[i] : i;
-    return '<div class="op-img-cell" data-op-media-idx="' + idx + '">' +
-             '<img src="assets/photos/' + it.src + '" alt="">' +
-           '</div>';
+
+  // Greedy row packing: accumulate images until total AR hits target (~2.8).
+  // Each row gets padding-bottom = 100/totalAR % so every cell's AR exactly
+  // matches the image — no uniform columns, varied compositions, no cropping.
+  var TARGET = 2.8;
+  var rows = [];
+  var cur = [], curAR = 0;
+  items.forEach(function(it, i) {
+    var ar = (it.width && it.height) ? it.width / it.height : 1.5;
+    cur.push({ it: it, ar: ar, idx: idxs ? idxs[i] : i });
+    curAR += ar;
+    if (curAR >= TARGET || cur.length >= 4) {
+      rows.push({ slots: cur.slice(), totalAR: curAR });
+      cur = []; curAR = 0;
+    }
+  });
+  if (cur.length) rows.push({ slots: cur, totalAR: curAR });
+
+  return rows.map(function(row) {
+    // Cap height so an underfull last row (e.g. single portrait) stays reasonable
+    var pct = Math.min(100 / row.totalAR, 72).toFixed(3);
+    var cells = row.slots.map(function(s) {
+      return '<div class="op-img-cell" data-op-media-idx="' + s.idx + '" style="flex:' + s.ar.toFixed(4) + '">' +
+               '<img src="assets/photos/' + s.it.src + '" alt="">' +
+             '</div>';
+    }).join('');
+    return '<div class="op-d-row" style="padding-bottom:' + pct + '%"><div class="op-d-row-inner">' + cells + '</div></div>';
   }).join('');
-  return '<div class="op-d-masonry" style="column-count:' + cols + '">' + cells + '</div>';
 }
 
 function opRenderDetail() {
