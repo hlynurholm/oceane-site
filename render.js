@@ -111,38 +111,20 @@ function opVideoBlockHtml(item, idx) {
 }
 
 function opImagesBlockHtml(items, idxs) {
-  // Justified-row layout: images share a row height, widths scale to their AR.
-  // We batch into rows of up to 3. If all items have stored dimensions we use
-  // flex-grow proportional to AR; otherwise fall back to equal columns.
-  var allHaveDims = items.every(function(it) { return it.width && it.height; });
-  if (allHaveDims) {
-    // Group into rows of up to 3
-    var rows = [];
-    for (var i = 0; i < items.length; i += 3) rows.push(items.slice(i, i + 3));
-    var idxRows = [];
-    for (var j = 0; j < (idxs ? idxs.length : items.length); j += 3) {
-      idxRows.push(idxs ? idxs.slice(j, j + 3) : [j, j+1, j+2]);
-    }
-    return rows.map(function(row, ri) {
-      var cells = row.map(function(it, ci) {
-        var ar = it.width / it.height;
-        var idx = idxRows[ri][ci];
-        return '<div class="op-img-cell" data-op-media-idx="' + idx + '" style="flex:' + ar.toFixed(4) + ' 1 0;min-width:80px">' +
-                 '<img src="assets/photos/' + it.src + '" alt="">' +
-               '</div>';
-      }).join('');
-      return '<div class="op-d-images op-d-images-justified">' + cells + '</div>';
-    }).join('');
+  if (items.length === 1) {
+    var idx0 = idxs ? idxs[0] : 0;
+    return '<div class="op-img-cell op-img-solo" data-op-media-idx="' + idx0 + '">' +
+             '<img src="assets/photos/' + items[0].src + '" alt="">' +
+           '</div>';
   }
-  // Fallback: equal columns
-  var cols = Math.min(items.length, 3);
+  var cols = items.length >= 5 ? 3 : 2;
   var cells = items.map(function(it, i) {
     var idx = idxs ? idxs[i] : i;
     return '<div class="op-img-cell" data-op-media-idx="' + idx + '">' +
              '<img src="assets/photos/' + it.src + '" alt="">' +
            '</div>';
   }).join('');
-  return '<div class="op-d-images" style="grid-template-columns:repeat(' + cols + ',1fr)">' + cells + '</div>';
+  return '<div class="op-d-masonry" style="column-count:' + cols + '">' + cells + '</div>';
 }
 
 function opRenderDetail() {
