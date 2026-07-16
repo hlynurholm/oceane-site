@@ -372,7 +372,7 @@
   {
     "slug": "p7",
     "n": "06",
-    "title": "Formula E Documentary",
+    "title": "Formula E Heimildamynd",
     "client": "Andretti",
     "kind": "Andretti Formula E Team",
     "services": "Documentary",
@@ -397,7 +397,7 @@
   {
     "slug": "p8",
     "n": "07",
-    "title": "Chitocare Brand Movie",
+    "title": "Chitocare brand-mynd",
     "client": "Chitocare",
     "kind": "Chitocare",
     "services": "Brand Film",
@@ -445,8 +445,8 @@
     "n": "09",
     "title": "FM95Blö",
     "client": "FM95Blö",
-    "kind": "Concert lineup reveal",
-    "services": "Advertisement",
+    "kind": "Tónleikatilkynning",
+    "services": "Auglýsing",
     "year": "2026",
     "description": "",
     "media": [
