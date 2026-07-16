@@ -155,10 +155,10 @@
     "title": "Formula 1",
     "title_is": "",
     "kind": "Photography",
-    "kind_is": "",
+    "kind_is": "Ljósmyndun",
     "client": "Harbor Co.",
     "services": "Social media",
-    "services_is": "",
+    "services_is": "Samfélagsmiðlar",
     "year": "2023-2026",
     "description": "",
     "description_is": "",
@@ -279,5 +279,94 @@
       }
     ],
     "bgPosition": "42.2% 30.6%"
+  },
+  {
+    "slug": "p6",
+    "n": "05",
+    "title": "Nocco Electrolyte",
+    "client": "Core Heildsala",
+    "kind": "Core Heildsala",
+    "services": "Auglýsing",
+    "year": "2026",
+    "description": "",
+    "media": [
+      {
+        "type": "image",
+        "src": "Nocco-Electrolyte-3000px---HH_04824.webp",
+        "width": 1600,
+        "height": 2400
+      },
+      {
+        "type": "image",
+        "src": "Nocco-Electrolyte-3000px---HH_04375.webp",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "type": "image",
+        "src": "Nocco-Electrolyte-3000px---HH_04546.webp",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "type": "image",
+        "src": "Nocco-Electrolyte-3000px---HH_06029.webp",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "type": "image",
+        "src": "Nocco-Electrolyte-3000px---HH_04890.webp",
+        "width": 1600,
+        "height": 2400
+      },
+      {
+        "type": "image",
+        "src": "Nocco-Electrolyte-3000px---HH_04373.webp",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "type": "image",
+        "src": "Nocco-Electrolyte-3000px---HH_05454.webp",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "type": "image",
+        "src": "Nocco-Electrolyte-3000px---HH_05022.webp",
+        "width": 1600,
+        "height": 2400
+      },
+      {
+        "type": "image",
+        "src": "Nocco-Electrolyte-3000px---HH_04643.webp",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "type": "image",
+        "src": "Nocco-Electrolyte-3000px---HH_04600.webp",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "type": "image",
+        "src": "Nocco-Electrolyte-3000px---HH_04577.webp",
+        "width": 1600,
+        "height": 2400
+      },
+      {
+        "type": "video",
+        "streamUid": "f2c3557d842ccaead9fb910569f6640e",
+        "poster": "https://customer-glfted1bbx13jo4x.cloudflarestream.com/f2c3557d842ccaead9fb910569f6640e/thumbnails/thumbnail.jpg",
+        "url": "",
+        "width": 4096,
+        "height": 1862
+      }
+    ],
+    "coverStreamUid": "f2c3557d842ccaead9fb910569f6640e",
+    "coverWidth": 4096,
+    "coverHeight": 1862
   }
 ]
