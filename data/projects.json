@@ -8,10 +8,10 @@
     "kind_is": "",
     "client": "Fjárhagsleg heilsa",
     "services": "Commercial",
-    "services_is": "",
+    "services_is": "Auglýsing",
     "year": "2026",
-    "description": "Herferð framleidd fyrir Íslandsbanka með bakaranum Gulla Arnar",
-    "description_is": "",
+    "description": "A commercial for Íslandsbanki with the baker Gulli Arnar",
+    "description_is": "Auglýsing framleidd fyrir Íslandsbanka með bakaranum Gulla Arnar",
     "media": [
       {
         "type": "image",
@@ -43,7 +43,8 @@
     "bgPosition": "58.2% 35.0%",
     "styles": {
       "description": "30px"
-    }
+    },
+    "year_is": "2025"
   },
   {
     "slug": "p2",

@@ -57,7 +57,13 @@ langEditBtn.addEventListener('click', () => {
   // Re-render so contenteditable fields show the new language's content
   if (editMode) {
     exitEditMode();
-    reRenderHome();
+    if (PAGE === 'home') {
+      reRenderHome();
+    } else {
+      const slug = new URLSearchParams(location.search).get('p') || projects[0]?.slug;
+      const proj = projects.find(p => p.slug === slug);
+      if (proj) reRenderProject(proj);
+    }
     setTimeout(enterEditMode, 120);
   } else if (typeof window.opSetLang === 'function') {
     window.opSetLang(next);

@@ -33,7 +33,11 @@ function opGroupMedia(items) {
 
 function opLoadProjects() {
   if (window.__opProjectsOverride) return Promise.resolve(window.__opProjectsOverride);
-  return fetch('data/projects.json?v=' + Date.now()).then(function(r) { return r.json(); });
+  if (window.__opProjectsCache)    return Promise.resolve(window.__opProjectsCache);
+  return fetch('data/projects.json?v=' + Date.now()).then(function(r) { return r.json(); }).then(function(d) {
+    window.__opProjectsCache = d;
+    return d;
+  });
 }
 
 function opProjTile(p, index, total) {
