@@ -1,3 +1,11 @@
+function opField(proj, field) {
+  if (window.opLang === 'is') {
+    var v = proj[field + '_is'];
+    if (v) return v;
+  }
+  return proj[field] || '';
+}
+
 function opFs(proj, field) {
   var s = proj.styles && proj.styles[field];
   if (!s) return '';
@@ -70,8 +78,8 @@ function opProjTile(p, index, total) {
       '<div class="op-proj-watermark" style="' + (alignRight ? 'left' : 'right') + ':2vw">' + num + '</div>' +
       '<div class="op-proj-info" style="' + side + ':clamp(20px,4vw,56px)' + (alignRight ? ';text-align:right' : '') + '">' +
         '<div class="op-proj-rule"' + (alignRight ? ' style="margin-left:auto"' : '') + '></div>' +
-        '<div class="op-proj-title" data-op-field="tileTitle"' + opFs(p,'tileTitle') + '>' + p.title + '</div>' +
-        '<div class="op-proj-kind">' + p.kind + '</div>' +
+        '<div class="op-proj-title" data-op-field="tileTitle"' + opFs(p,'tileTitle') + '>' + opField(p,'title') + '</div>' +
+        '<div class="op-proj-kind">' + opField(p,'kind') + '</div>' +
       '</div>' +
     '</a>';
 }
@@ -256,26 +264,27 @@ function opRenderDetail() {
       return g.kind === 'video' ? opVideoBlockHtml(g.item, g.idx) : opImagesBlockHtml(g.items, g.idxs);
     }).join('');
 
-    document.title = 'Oceane Productions — ' + proj.title;
+    document.title = 'Oceane Productions — ' + opField(proj, 'title');
+    var tr = (window.opTranslations && window.opTranslations[window.opLang || 'en']) || {};
 
     root.innerHTML = '' +
       '<div class="op-d-top">' +
         '<div class="op-d-topbar">' +
-          '<a class="op-d-back" href="index.html">&larr; All projects</a>' +
+          '<a class="op-d-back" href="index.html">' + (tr.detail_back || '&larr; All projects') + '</a>' +
           '<div class="op-d-n"><span class="op-d-n-dot"></span>' + num + ' / ' + tot + '</div>' +
         '</div>' +
-        '<div class="op-d-client" data-op-field="title"' + opFs(proj,'title') + '>' + proj.title + '</div>' +
-        '<div class="op-d-title" data-op-field="kind"' + opFs(proj,'kind') + '>' + proj.kind + '</div>' +
+        '<div class="op-d-client" data-op-field="title"' + opFs(proj,'title') + '>' + opField(proj,'title') + '</div>' +
+        '<div class="op-d-title" data-op-field="kind"' + opFs(proj,'kind') + '>' + opField(proj,'kind') + '</div>' +
         '<div class="op-d-meta-row">' +
-          '<div class="op-d-meta-item"><span class="op-d-meta-label">Services</span><span class="op-d-meta-value" data-op-field="services">' + proj.services + '</span></div>' +
-          '<div class="op-d-meta-item"><span class="op-d-meta-label">Year</span><span class="op-d-meta-value" data-op-field="year">' + proj.year + '</span></div>' +
+          '<div class="op-d-meta-item"><span class="op-d-meta-label">' + (tr.detail_services || 'Services') + '</span><span class="op-d-meta-value" data-op-field="services">' + opField(proj,'services') + '</span></div>' +
+          '<div class="op-d-meta-item"><span class="op-d-meta-label">' + (tr.detail_year || 'Year') + '</span><span class="op-d-meta-value" data-op-field="year">' + opField(proj,'year') + '</span></div>' +
         '</div>' +
-        '<div class="op-d-desc"><p data-op-field="description"' + opFs(proj,'description') + '>' + proj.description + '</p></div>' +
+        '<div class="op-d-desc"><p data-op-field="description"' + opFs(proj,'description') + '>' + opField(proj,'description') + '</p></div>' +
       '</div>' +
       (groups.length ? '<div class="op-d-gallery">' + galleryHtml + '</div>' : '') +
       '<div class="op-d-nav">' +
-        '<a href="project.html?p=' + prev.slug + '">&larr; ' + prev.title + '</a>' +
-        '<a href="project.html?p=' + next.slug + '">' + next.title + ' &rarr;</a>' +
+        '<a href="project.html?p=' + prev.slug + '">&larr; ' + opField(prev,'title') + '</a>' +
+        '<a href="project.html?p=' + next.slug + '">' + opField(next,'title') + ' &rarr;</a>' +
       '</div>';
   });
 }

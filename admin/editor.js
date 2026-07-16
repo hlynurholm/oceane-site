@@ -20,6 +20,7 @@ bar.innerHTML = `
   <div class="op-edit-sep"></div>
   <button class="op-edit-btn op-edit-toggle" id="op-toggle">Edit</button>
   <button class="op-edit-btn op-edit-btn-green" id="op-new-project">+ New Project</button>
+  <button class="op-edit-btn" id="op-lang-edit-btn" title="Switch editing language">EN</button>
   <button class="op-edit-btn" id="op-mob-btn">Phone</button>
   <div class="op-edit-spacer"></div>
   <button class="op-edit-btn" id="op-undo" disabled title="Undo (⌘Z)">Undo</button>
@@ -36,12 +37,32 @@ document.body.prepend(bar);
 const $  = id => document.getElementById(id);
 const toggleBtn   = $('op-toggle');
 const newProjBtn  = $('op-new-project');
+const langEditBtn = $('op-lang-edit-btn');
 const undoBtn     = $('op-undo');
 const saveBtn     = $('op-save');
 const pushBtn     = $('op-push');
 const resetBtn    = $('op-reset');
 const snapsBtn    = $('op-snaps-btn');
 const snapsPanel  = $('op-snaps-panel');
+
+// Tracks which language is being edited ('en' or 'is')
+window.opEditLang = 'en';
+
+langEditBtn.addEventListener('click', () => {
+  const next = window.opEditLang === 'en' ? 'is' : 'en';
+  window.opEditLang = next;
+  window.opLang     = next;
+  langEditBtn.textContent = next.toUpperCase();
+  langEditBtn.classList.toggle('op-edit-btn-active', next === 'is');
+  // Re-render so contenteditable fields show the new language's content
+  if (editMode) {
+    exitEditMode();
+    reRenderHome();
+    setTimeout(enterEditMode, 120);
+  } else if (typeof window.opSetLang === 'function') {
+    window.opSetLang(next);
+  }
+});
 
 // ── Focal point picker modal ──────────────────────────────────────────────────
 const focalModal = createModal(`
@@ -1037,7 +1058,8 @@ function makeProjectEditable(el, proj, field) {
   el._opInput = () => {
     const clone = el.cloneNode(true);
     clone.querySelectorAll('.op-text-resize-badge,.op-text-width-handle').forEach(n => n.remove());
-    proj[field] = clone.innerText.trim();
+    const saveField = (window.opEditLang === 'is') ? field + '_is' : field;
+    proj[saveField] = clone.innerText.trim();
     markDirty();
     // If all real text is gone, the only remaining child may be the contenteditable=false
     // handle — Chrome cannot place a cursor there. Insert a <br> so the field stays editable.

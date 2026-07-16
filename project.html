@@ -12,19 +12,20 @@
 
 <header class="op-header" id="op-header">
   <img src="assets/logo-dark-blue.png" alt="Oceane Productions">
-  <a class="op-btn" href="#op-footer">say hi</a>
+  <button id="op-lang-toggle" class="op-lang-btn">IS</button>
+  <a class="op-btn" href="contact.html" data-i18n="nav_contact">contact</a>
 </header>
 
 <div id="op-detail-root"></div>
 
 <footer class="op-footer" id="op-footer">
   <div class="op-footer-dotgrid"></div>
-  <div class="op-footer-tag"><span class="op-footer-dot"></span>07 / 06 — let's talk</div>
-  <h2>Got a shoot coming up?</h2>
-  <div class="op-footer-cta"><a class="op-btn" href="mailto:hello@oceaneproductions.com">start a project</a></div>
+  <div class="op-footer-tag"><span class="op-footer-dot"></span><span data-i18n="footer_tag">07 / 06 — let's talk</span></div>
+  <h2 data-i18n="footer_h2">Got a shoot coming up?</h2>
+  <div class="op-footer-cta"><a class="op-btn" href="contact.html" data-i18n="footer_cta">contact</a></div>
   <div class="op-footer-bottom">
     <img src="assets/logo-offwhite.png" alt="Oceane Productions">
-    <span class="op-footer-note">Budgets are small. Egos are too.</span>
+    <span class="op-footer-note" data-i18n="footer_note">Budgets are small. Egos are too.</span>
     <div class="op-social">
       <a class="op-icon-btn" href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line></svg></a>
       <a class="op-icon-btn" href="#" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"></path><path d="m10 15 5-3-5-3z"></path></svg></a>
@@ -34,6 +35,7 @@
 </footer>
 
 <script src="script.js"></script>
+<script src="i18n.js"></script>
 <script src="render.js"></script>
 </body>
 </html>

@@ -3,11 +3,15 @@
     "slug": "p1",
     "n": "01",
     "title": "Fjárhagsleg heilsa",
+    "title_is": "",
     "kind": "Íslandsbanki",
+    "kind_is": "",
     "client": "Fjárhagsleg heilsa",
     "services": "Commercial",
+    "services_is": "",
     "year": "2026",
     "description": "Herferð framleidd fyrir Íslandsbanka með bakaranum Gulla Arnar",
+    "description_is": "",
     "media": [
       {
         "type": "image",
@@ -44,12 +48,16 @@
   {
     "slug": "p2",
     "n": "02",
-    "title": "FIFA World Cup Ad",
+    "title": "FIFA World Cup",
+    "title_is": "",
     "kind": "Epicbet",
+    "kind_is": "",
     "client": "Epicbet",
-    "services": "Commercial",
+    "services": "Auglýsing",
+    "services_is": "",
     "year": "2026",
-    "description": "A FIFA World Cup advetisement for the online betting copmany Epicbet. With comedy and quality as our hallmarks, this Epicbet spot proves you don't need a big crew to land a big laugh.",
+    "description": "Auglýsing fyrir HM í knattspyrnu fyrir veðmálafyrirtækið Epicbet. Með kómík og gæði að leiðarljósi sýnir þessi Epicbet-auglýsing að þú þarft ekki stórt crew til að fá alvöru niðurstöður.",
+    "description_is": "",
     "media": [
       {
         "type": "video",
@@ -75,11 +83,15 @@
     "slug": "p3",
     "n": "03",
     "title": "Innsæi",
+    "title_is": "",
     "kind": "Chitocare",
+    "kind_is": "",
     "client": "Field Notes Farm",
     "services": "Campaign",
+    "services_is": "",
     "year": "2026",
     "description": "A mix of footage and photographs captured for Chitocare in the Forest Lagoon in the north of Iceland.",
+    "description_is": "",
     "media": [
       {
         "type": "image",
@@ -140,11 +152,15 @@
     "slug": "p5",
     "n": "04",
     "title": "Formula 1",
+    "title_is": "",
     "kind": "Photography",
+    "kind_is": "",
     "client": "Harbor Co.",
     "services": "Social media",
+    "services_is": "",
     "year": "2023-2026",
     "description": "",
+    "description_is": "",
     "media": [
       {
         "type": "image",
