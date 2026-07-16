@@ -2,7 +2,9 @@
 'use strict';
 
 // ── State ─────────────────────────────────────────────────────────────────────
-const PAGE = document.getElementById('op-projects') ? 'home' : 'project';
+const PAGE = document.getElementById('op-projects') ? 'home'
+           : document.getElementById('op-contact-root') ? 'contact'
+           : 'project';
 let editMode = false, dirty = false;
 let projects = [];
 let indexEdits = [];  // [{selector, html?, attr?}] for index.html
@@ -59,6 +61,8 @@ langEditBtn.addEventListener('click', () => {
     exitEditMode();
     if (PAGE === 'home') {
       reRenderHome();
+    } else if (PAGE === 'contact') {
+      if (typeof window.opRefreshContact === 'function') window.opRefreshContact();
     } else {
       const slug = new URLSearchParams(location.search).get('p') || projects[0]?.slug;
       const proj = projects.find(p => p.slug === slug);
@@ -357,6 +361,8 @@ function enterEditMode() {
   if (PAGE === 'home') {
     if (!staticEditingAttached) { setupHomeStaticEditing(); staticEditingAttached = true; }
     setupHomeTileEditing();
+  } else if (PAGE === 'contact') {
+    setupContactEditing();
   } else {
     setupProjectEditing();
   }
@@ -469,6 +475,39 @@ function setupHomeStaticEditing() {
   document.querySelectorAll('.op-header .op-btn, .op-footer-cta .op-btn').forEach((btn, i) => {
     const sel = btn.closest('.op-header') ? '.op-header .op-btn' : '.op-footer-cta .op-btn';
     makeResizable(btn, sel, 'index.html');
+  });
+}
+
+// ── Contact page editing ──────────────────────────────────────────────────────
+function setupContactEditing() {
+  let pages = null;
+
+  function savePages() {
+    if (!pages) return;
+    fetch('/api/save-pages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(pages)
+    });
+    markDirty();
+  }
+
+  window.opLoadPages().then(function (data) {
+    pages = data;
+    window.__opPagesOverride = pages;
+
+    document.querySelectorAll('[data-page-field]').forEach(el => {
+      const key = el.dataset.pageField;
+      const saveKey = window.opEditLang === 'is' ? key + '_is' : key;
+      el.contentEditable = 'true';
+      el._opFocus = () => snapshot();
+      el._opInput = () => {
+        pages.contact[saveKey] = el.innerText.trim();
+        savePages();
+      };
+      el.addEventListener('focus', el._opFocus);
+      el.addEventListener('input', el._opInput);
+    });
   });
 }
 

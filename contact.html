@@ -27,15 +27,47 @@
   <button id="op-lang-toggle" class="op-lang-btn">IS</button>
 </header>
 
-<main class="op-contact">
+<main class="op-contact" id="op-contact-root">
   <div class="op-contact-dotgrid"></div>
-  <div class="op-contact-tag"><span class="op-contact-dot"></span><span data-i18n="contact_tag">get in touch</span></div>
-  <h1 data-i18n="contact_h1">Let's make<br>something.</h1>
+  <div class="op-contact-tag"><span class="op-contact-dot"></span><span data-page-field="tag">get in touch</span></div>
+  <h1 data-page-field="h1">Let's make something.</h1>
   <a class="op-contact-email" href="mailto:hlynur@oceane.is">hlynur@oceane.is</a>
-  <a class="op-contact-back" href="index.html" data-i18n="contact_back">&larr; back to work</a>
+  <a class="op-contact-back" href="index.html" data-page-field="back">← back to work</a>
 </main>
 
 <script src="script.js"></script>
 <script src="i18n.js"></script>
+<script>
+(function () {
+  function opContactField(c, key) {
+    if (window.opLang === 'is' && c[key + '_is']) return c[key + '_is'];
+    return c[key] || '';
+  }
+  function opRenderContact(pages) {
+    window.__opPagesCache = pages;
+    var c = pages.contact || {};
+    document.querySelectorAll('[data-page-field]').forEach(function (el) {
+      el.textContent = opContactField(c, el.dataset.pageField);
+    });
+    var toggle = document.getElementById('op-lang-toggle');
+    if (toggle) toggle.textContent = window.opLang === 'is' ? 'EN' : 'IS';
+  }
+  window.opLoadPages = function () {
+    if (window.__opPagesOverride) return Promise.resolve(window.__opPagesOverride);
+    if (window.__opPagesCache)    return Promise.resolve(window.__opPagesCache);
+    return fetch('data/pages.json?v=' + Date.now()).then(function (r) { return r.json(); });
+  };
+  window.opRefreshContact = function () {
+    window.opLoadPages().then(opRenderContact);
+  };
+  // Re-render when lang switches
+  var _orig = window.opSetLang;
+  window.opSetLang = function (lang) {
+    if (_orig) _orig(lang);
+    window.opRefreshContact();
+  };
+  window.opRefreshContact();
+})();
+</script>
 </body>
 </html>

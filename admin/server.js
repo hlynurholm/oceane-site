@@ -107,6 +107,13 @@ app.post('/api/save-projects', (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+app.post('/api/save-pages', (req, res) => {
+  try {
+    fs.writeFileSync(path.join(SITE, 'data', 'pages.json'), JSON.stringify(req.body, null, 2));
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // updates: [{selector, html?, attr?: {name, value}}]
 app.post('/api/save-html', (req, res) => {
   try {
