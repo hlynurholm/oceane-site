@@ -368,5 +368,76 @@
     "coverStreamUid": "f2c3557d842ccaead9fb910569f6640e",
     "coverWidth": 4096,
     "coverHeight": 1862
+  },
+  {
+    "slug": "p7",
+    "n": "06",
+    "title": "Formula E Documentary",
+    "client": "Andretti",
+    "kind": "Andretti Formula E Team",
+    "services": "Documentary",
+    "year": "2024",
+    "description": "At Oceane Productions, we had the opportunity to capture the excitement and dedication of the Andretti team during the Chinese ePrix. This documentary takes you into the world of Formula E racing, highlighting the team’s hard work and innovative spirit. We managed every aspect of the production, from writing and shooting to editing and coloring. This hands-on approach allowed us to deliver a cohesive and high-quality film that showcases the true essence of Formula E and the Andretti team. Working with the Andretti team was an incredible experience. Their enthusiasm and teamwork made us feel welcome and part of the journey. We’re proud to share this documentary, which is now available on Andrettis YouTube channel and our Vimeo. Watch it to see the passion and effort that drive Formula E racing.",
+    "media": [
+      {
+        "type": "video",
+        "streamUid": "eef49ffff57ee0a85b82cc98cbba833d",
+        "poster": "FP2---HHH05279.JPG.webp",
+        "url": "",
+        "width": 3840,
+        "height": 1634
+      }
+    ],
+    "styles": {
+      "description": "18px"
+    },
+    "services_is": "Heimildamynd",
+    "bgPosition": "49.4% 63.3%"
+  },
+  {
+    "slug": "p8",
+    "n": "07",
+    "title": "Chitocare Brand Movie",
+    "client": "Chitocare",
+    "kind": "Chitocare",
+    "services": "Brand Film",
+    "year": "2025",
+    "description": "",
+    "media": [
+      {
+        "type": "video",
+        "streamUid": "7bcbac1a8dd368fb504008d0899385dc",
+        "poster": "https://customer-glfted1bbx13jo4x.cloudflarestream.com/7bcbac1a8dd368fb504008d0899385dc/thumbnails/thumbnail.jpg",
+        "url": "",
+        "width": 3840,
+        "height": 1920
+      }
+    ],
+    "coverStreamUid": "7bcbac1a8dd368fb504008d0899385dc",
+    "coverWidth": 3840,
+    "coverHeight": 1920
+  },
+  {
+    "slug": "p9",
+    "n": "08",
+    "title": "Herra í Höllinni",
+    "client": "Herra Hnetusmjör",
+    "kind": "Herra Hnetusmjör",
+    "services": "Aftermovie",
+    "year": "2026",
+    "description": "Aftermovie from the concert HERRA Í HÖLLINNI",
+    "media": [
+      {
+        "type": "video",
+        "streamUid": "6a273f5a4f11e71e3ce6846c84dc5c6b",
+        "poster": "https://customer-glfted1bbx13jo4x.cloudflarestream.com/6a273f5a4f11e71e3ce6846c84dc5c6b/thumbnails/thumbnail.jpg",
+        "url": "",
+        "width": 1920,
+        "height": 1080
+      }
+    ],
+    "coverStreamUid": "6a273f5a4f11e71e3ce6846c84dc5c6b",
+    "coverWidth": 1920,
+    "coverHeight": 1080
   }
 ]
