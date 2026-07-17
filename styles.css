@@ -12,7 +12,7 @@ a{text-decoration:none}
 .op-hero-media-img{position:absolute;inset:0;background-size:cover;background-position:center}
 .op-hero-video{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:177.78vh;height:56.25vw;min-width:100%;min-height:100%;border:none;pointer-events:none}
 .op-hero-vignette{position:absolute;top:0;left:0;right:0;height:50%;background:radial-gradient(ellipse at 50% 40%,rgba(10,9,7,.5) 0%,transparent 45%);pointer-events:none}
-.op-hero-dotgrid{position:absolute;top:0;left:0;right:0;height:50%;background-image:radial-gradient(rgba(255,252,249,.6) 1px,transparent 1px);background-size:28px 28px;pointer-events:none;will-change:background-position}
+.op-hero-dotgrid{position:absolute;top:0;left:0;right:0;height:50%;background-image:radial-gradient(#fffcf9 1px,transparent 1px);background-size:28px 28px;pointer-events:none;will-change:background-position;mix-blend-mode:difference}
 .op-hero-scan{position:absolute;top:0;left:0;right:0;height:50%;background:repeating-linear-gradient(0deg,rgba(255,252,249,.05) 0px,rgba(255,252,249,.05) 1px,transparent 1px,transparent 4px);pointer-events:none;mix-blend-mode:overlay}
 .op-hero-rec{position:absolute;top:36px;left:clamp(20px,4vw,56px);display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,252,249,.8)}
 .op-hero-rec-dot{width:8px;height:8px;border-radius:50%;background:#82abcc;animation:opPulse 1.6s ease-in-out infinite}
@@ -34,7 +34,7 @@ a{text-decoration:none}
 .op-proj:hover .op-proj-media{transform:scale(1.035)}
 .op-proj-scrim-l{position:absolute;inset:0;background:linear-gradient(100deg,rgba(20,19,16,.6) 0%,transparent 42%);pointer-events:none}
 .op-proj-scrim-r{position:absolute;inset:0;background:linear-gradient(260deg,rgba(20,19,16,.6) 0%,transparent 42%);pointer-events:none}
-.op-proj-dotgrid{position:absolute;top:0;bottom:0;width:50%;background-image:radial-gradient(rgba(255,252,249,.6) 1px,transparent 1px);background-size:28px 28px;pointer-events:none;will-change:background-position}
+.op-proj-dotgrid{position:absolute;top:0;bottom:0;width:50%;background-image:radial-gradient(#fffcf9 1px,transparent 1px);background-size:28px 28px;pointer-events:none;will-change:background-position;mix-blend-mode:difference}
 .op-proj-ruler{position:absolute;top:0;bottom:0;width:16px;background:repeating-linear-gradient(to bottom,rgba(255,252,249,.55) 0 2px,transparent 2px 18px);pointer-events:none}
 .op-proj-n{position:absolute;top:40px;display:flex;align-items:center;gap:8px;font-size:13px;letter-spacing:.06em;color:rgba(255,252,249,.75);white-space:nowrap}
 .op-proj-n-dot{width:8px;height:8px;border-radius:50%;background:#82abcc;display:inline-block;animation:opPulse 1.6s ease-in-out infinite}
@@ -45,7 +45,7 @@ a{text-decoration:none}
 .op-proj-title{font-family:'DM Serif Display',serif;font-weight:400;font-size:clamp(40px,6vw,96px);line-height:1;color:#fffcf9;margin:0;white-space:nowrap}
 .op-proj-kind{font-size:16px;color:rgba(255,252,249,.75);margin-top:14px}
 .op-footer{position:relative;overflow:hidden;min-height:100vh;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;padding:0 clamp(20px,4vw,56px);background:#141310}
-.op-footer-dotgrid{position:absolute;inset:0;background-image:radial-gradient(rgba(255,252,249,.6) 1px,transparent 1px);background-size:28px 28px;pointer-events:none;will-change:background-position;-webkit-mask-image:linear-gradient(to bottom,black 0%,black 18%,transparent 42%);mask-image:linear-gradient(to bottom,black 0%,black 18%,transparent 42%)}
+.op-footer-dotgrid{position:absolute;inset:0;background-image:radial-gradient(#fffcf9 1px,transparent 1px);background-size:28px 28px;pointer-events:none;will-change:background-position;mix-blend-mode:difference;-webkit-mask-image:linear-gradient(to bottom,black 0%,black 18%,transparent 42%);mask-image:linear-gradient(to bottom,black 0%,black 18%,transparent 42%)}
 .op-footer-tag{position:relative;display:flex;align-items:center;gap:10px;font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,252,249,.55);margin-bottom:24px}
 .op-footer-dot{width:8px;height:8px;border-radius:50%;background:#89a7bb;display:inline-block;animation:opPulse 1.6s ease-in-out infinite}
 .op-footer h2{position:relative;font-family:'DM Serif Display',serif;font-weight:400;font-size:clamp(48px,7vw,112px);line-height:1;color:#fffcf9;margin:0 0 40px;max-width:1200px}
