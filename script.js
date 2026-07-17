@@ -7,6 +7,20 @@
 })();
 
 (function(){
+  function opUpdateDotGrids() {
+    var sy = window.scrollY || window.pageYOffset;
+    document.querySelectorAll('.op-hero-dotgrid,.op-proj-dotgrid,.op-footer-dotgrid,.op-contact-dotgrid').forEach(function(el) {
+      var pageTop = el.getBoundingClientRect().top + sy;
+      el.style.backgroundPositionY = (sy - pageTop) + 'px';
+    });
+  }
+  window.opUpdateDotGrids = opUpdateDotGrids;
+  window.addEventListener('scroll', opUpdateDotGrids, {passive: true});
+  window.addEventListener('load', opUpdateDotGrids);
+  setTimeout(opUpdateDotGrids, 300);
+})();
+
+(function(){
   var pre = document.getElementById('op-preloader');
   if (!pre) return;
 

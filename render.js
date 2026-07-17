@@ -175,6 +175,7 @@ function opRenderHome() {
     root.innerHTML = projects.map(function(p, i) { return opProjTile(p, i, total); }).join('');
     opBuildHeroStrip(projects);
     opInjectMobileStyles(projects);
+    if (window.opUpdateDotGrids) window.opUpdateDotGrids();
   });
 }
 
