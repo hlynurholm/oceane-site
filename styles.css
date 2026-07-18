@@ -54,13 +54,13 @@ a{text-decoration:none}
 .op-icon-btn{width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fffcf9;transition:background .15s cubic-bezier(.16,1,.3,1)}
 .op-icon-btn:hover{background:rgba(255,252,249,.12)}
 .op-icon-btn svg{width:17px;height:17px}
-.op-lang-btn{font-family:'DM Sans',sans-serif;font-weight:500;font-size:13px;letter-spacing:.06em;background:transparent;border:1px solid rgba(255,252,249,.35);color:rgba(255,252,249,.8);border-radius:999px;padding:6px 14px;cursor:pointer;transition:border-color .15s,color .15s}
+.op-lang-btn{font-family:'DM Sans',sans-serif;font-weight:500;font-size:12px;letter-spacing:.06em;background:rgba(10,9,7,.6);border:1px solid rgba(255,252,249,.35);color:rgba(255,252,249,.8);border-radius:50%;width:36px;height:36px;padding:0;cursor:pointer;transition:border-color .15s,color .15s;backdrop-filter:blur(12px);display:inline-flex;align-items:center;justify-content:center}
 .op-lang-btn:hover{border-color:rgba(255,252,249,.7);color:#fffcf9}
-.op-header-nav{display:flex;align-items:center;gap:2px;border:1px solid rgba(255,252,249,.2);border-radius:999px;padding:3px}
-.op-nav-link{font-family:'DM Sans',sans-serif;font-weight:500;font-size:13px;letter-spacing:.06em;color:rgba(255,252,249,.7);padding:6px 12px;transition:color .15s}
+.op-header-right{display:flex;align-items:center;gap:10px}
+.op-header-nav{display:flex;align-items:center;gap:2px;border:1px solid rgba(255,252,249,.2);border-radius:999px;padding:3px;background:rgba(10,9,7,.6);backdrop-filter:blur(12px)}
+.op-nav-link{font-family:'DM Sans',sans-serif;font-weight:500;font-size:13px;letter-spacing:.06em;color:rgba(255,252,249,.7);padding:6px 14px;border-radius:999px;transition:color .15s}
 .op-nav-link:hover{color:#fffcf9}
-.op-header-nav .op-lang-btn{border-color:transparent}
-.op-header-nav .op-btn{padding:7px 18px}
+.op-nav-link.op-nav-active{color:#fffcf9;background:#1b5294}
 .op-footer-link{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,252,249,.45);transition:color .2s}
 .op-footer-link:hover{color:#fffcf9}
 @media (max-width:720px){.op-proj-title{font-size:clamp(32px,9vw,64px)}}
