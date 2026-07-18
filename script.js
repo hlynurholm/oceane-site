@@ -147,7 +147,10 @@
             ? 'opacity 0.7s ease, transform 0.7s ease'
             : 'opacity 0.7s ease';
           el.style.opacity = '1';
-          if (hasTranslate) el.style.transform = 'translateY(0)';
+          if (hasTranslate) {
+            el.style.transform = 'translateY(0)';
+            setTimeout(function() { el.style.transform = ''; el.style.transition = ''; }, 700);
+          }
         }, i * 130);
       });
 
