@@ -405,6 +405,16 @@ function exitEditMode() {
 
 // ── Homepage: static text (hero, footer) ─────────────────────────────────────
 function setupHomeStaticEditing() {
+  let pages = null;
+  if (window.opLoadPages) window.opLoadPages().then(d => { pages = d; window.__opPagesOverride = d; });
+
+  const IS_KEYS = {
+    '.op-hero h1':     'hero_h1_is',
+    '.op-hero-sub':    'hero_sub_is',
+    '.op-footer h2':   'footer_h2_is',
+    '.op-footer-note': 'footer_note_is',
+  };
+
   [
     ['.op-hero h1',       '.op-hero h1'],
     ['.op-hero-sub',      '.op-hero-sub'],
@@ -412,7 +422,26 @@ function setupHomeStaticEditing() {
     ['.op-footer-note',   '.op-footer-note'],
   ].forEach(([sel, saveSel]) => {
     const el = document.querySelector(sel);
-    makeIndexEditable(el, saveSel);
+    if (!el) return;
+    el.contentEditable = 'true';
+    el._opFocus = () => snapshot();
+    el._opInput = () => {
+      if (window.opEditLang === 'is') {
+        (pages ? Promise.resolve(pages) : window.opLoadPages()).then(p => {
+          pages = p; window.__opPagesOverride = p;
+          if (!p.home) p.home = {};
+          p.home[IS_KEYS[sel]] = el.innerHTML;
+          if (window.opTranslations?.is) window.opTranslations.is[IS_KEYS[sel].replace('_is', '')] = el.innerHTML;
+          fetch('/api/save-pages', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(p) });
+          markDirty();
+        });
+      } else {
+        setIndexHtml(saveSel, el.innerHTML);
+        markDirty();
+      }
+    };
+    el.addEventListener('focus', el._opFocus);
+    el.addEventListener('input', el._opInput);
     addIndexTextResizeHandle(el, saveSel);
   });
 

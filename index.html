@@ -31,7 +31,7 @@
   <img class="op-hero-logo" src="assets/logo-offwhite.png" alt="Oceane Productions" style="top:26%;left:50%;transform:translate(-50%,-50%)">
   <div class="op-hero-body">
     <h1 style="position: relative; max-width: 97%;" data-i18n="hero_h1">Fagleg framleiðsla,<br>á einfaldan hátt.<div class="op-text-width-handle" contenteditable="false"><span class="op-text-width-tip"></span></div></h1>
-    <div class="op-hero-sub" style="position: relative; max-width: 55%;" data-i18n="hero_sub">Skilvirk framleiðsla fyrir vörumerki sem vilja niðurstöður, frá fyrsta upphafi til afhendingar.<div class="op-text-width-handle" contenteditable="false"><span class="op-text-width-tip"></span></div></div>
+    <div class="op-hero-sub" style="position: relative; max-width: 55%;" data-i18n="hero_sub">Direct, efficient production for brands who want results without the overhead, streamlined from first call to delivery. Based in Iceland, working worldwide.<div class="op-text-width-handle" contenteditable="false"><span class="op-text-width-tip"></span></div></div>
     <div class="op-hero-bottom">
       <div class="op-hero-scroll"><div class="op-hero-scroll-track"></div>Scroll</div>
       <div class="op-hero-count">01 / 06</div>
@@ -61,6 +61,31 @@
 <script src="script.js"></script>
 <script src="i18n.js"></script>
 <script src="render.js"></script>
+<script>
+(function () {
+  window.opLoadPages = window.opLoadPages || function () {
+    if (window.__opPagesOverride) return Promise.resolve(window.__opPagesOverride);
+    if (window.__opPagesCache)    return Promise.resolve(window.__opPagesCache);
+    return fetch('data/pages.json?v=' + Date.now()).then(function (r) { return r.json(); });
+  };
+  window.opLoadPages().then(function (pages) {
+    window.__opPagesCache = pages;
+    var h  = pages.home || {};
+    var is = window.opTranslations && window.opTranslations.is;
+    if (!is) return;
+    if (h.hero_h1_is)     is.hero_h1    = h.hero_h1_is;
+    if (h.hero_sub_is)    is.hero_sub   = h.hero_sub_is;
+    if (h.footer_h2_is)   is.footer_h2  = h.footer_h2_is;
+    if (h.footer_note_is) is.footer_note = h.footer_note_is;
+    if (window.opLang === 'is') {
+      document.querySelectorAll('[data-i18n]').forEach(function (el) {
+        var v = is[el.dataset.i18n];
+        if (v !== undefined) el.innerHTML = v;
+      });
+    }
+  });
+})();
+</script>
 
 
 </body></html>

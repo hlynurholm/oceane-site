@@ -20,11 +20,7 @@
     },
     is: {
       nav_contact:      'hafa samband',
-      hero_h1:          'Fagleg framleiðsla,<br>gerð einföld.',
-      hero_sub:         'Bein og skilvirk framleiðsla fyrir vörumerki sem vilja niðurstöður. Frá fyrsta símtali til afhendingar. Með aðsetur á Íslandi, vinnur um heim allan.',
       footer_tag:       '07 / 06 — við tökum í gegn',
-      footer_h2:        'Ertu með tökur í uppsiglingu?',
-      footer_note:      'Fjárhagsáætlanir eru litlar. Egóið líka.',
       footer_cta:       'hafa samband',
       detail_back:      '← Öll verkefni',
       detail_services:  'Þjónusta',

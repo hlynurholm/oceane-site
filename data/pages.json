@@ -1,4 +1,10 @@
 {
+  "home": {
+    "hero_h1_is": "Fagleg framleiðsla,<br>á einfaldan hátt.<div class=\"op-text-width-handle\" contenteditable=\"false\"><span class=\"op-text-width-tip\"></span></div>",
+    "hero_sub_is": "Skilvirk framleiðsla fyrir vörumerki sem vilja niðurstöður, frá upphafi til afhendingar.<div class=\"op-text-width-handle\" contenteditable=\"false\"><span class=\"op-text-width-tip\"></span></div>",
+    "footer_h2_is": "Ertu með tökur í uppsiglingu?",
+    "footer_note_is": "Fjárhagsáætlanir eru litlar. Egóið líka."
+  },
   "contact": {
     "tag": "get in touch",
     "tag_is": "hafðu samband",
