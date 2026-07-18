@@ -7,41 +7,84 @@
 })();
 
 (function(){
-  var dotCache = [];
-  var rafPending = false;
+  var canvas = document.createElement('canvas');
+  canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:difference;z-index:5';
+  document.body.appendChild(canvas);
+  var ctx = canvas.getContext('2d');
+  var GRID = 28, R = 1, raf = null;
 
-  function buildCache() {
-    var sy = window.scrollY || window.pageYOffset;
-    dotCache = [];
-    document.querySelectorAll('.op-hero-dotgrid,.op-proj-dotgrid,.op-footer-dotgrid,.op-contact-dotgrid').forEach(function(el) {
-      dotCache.push({el: el, pageTop: el.getBoundingClientRect().top + sy});
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    schedule();
+  }
+
+  function drawDots(clipX, clipY, clipW, clipH, alphaFn) {
+    if (clipW <= 0 || clipH <= 0) return;
+    var vw = canvas.width, vh = canvas.height;
+    var x0 = Math.floor(Math.max(0, clipX) / GRID) * GRID;
+    var y0 = Math.floor(Math.max(0, clipY) / GRID) * GRID;
+    var x1 = Math.min(vw, clipX + clipW);
+    var y1 = Math.min(vh, clipY + clipH);
+    ctx.beginPath();
+    for (var y = y0; y <= y1; y += GRID) {
+      if (y < 0 || y > vh) continue;
+      for (var x = x0; x <= x1; x += GRID) {
+        if (x < 0 || x > vw) continue;
+        var alpha = alphaFn ? alphaFn(y) : 1;
+        if (alpha <= 0) continue;
+        ctx.globalAlpha = alpha;
+        ctx.beginPath();
+        ctx.arc(x, y, R, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function draw() {
+    raf = null;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#fffcf9';
+
+    var hero = document.querySelector('.op-hero');
+    if (hero) {
+      var r = hero.getBoundingClientRect();
+      drawDots(0, r.top, canvas.width, r.height / 2);
+    }
+
+    document.querySelectorAll('.op-proj').forEach(function(el, i) {
+      var r = el.getBoundingClientRect();
+      var x = (i % 2 === 1) ? canvas.width / 2 : 0;
+      drawDots(x, r.top, canvas.width / 2, r.height);
     });
-  }
 
-  function applyPositions() {
-    rafPending = false;
-    var sy = window.scrollY || window.pageYOffset;
-    for (var i = 0; i < dotCache.length; i++) {
-      dotCache[i].el.style.backgroundPositionY = (sy - dotCache[i].pageTop) + 'px';
+    var footer = document.querySelector('.op-footer');
+    if (footer) {
+      var r = footer.getBoundingClientRect();
+      var fs = r.top + r.height * 0.18, fe = r.top + r.height * 0.42;
+      drawDots(0, r.top, canvas.width, r.height * 0.42, function(y) {
+        if (y <= fs) return 1;
+        if (y >= fe) return 0;
+        return 1 - (y - fs) / (fe - fs);
+      });
+    }
+
+    var contact = document.querySelector('.op-contact');
+    if (contact) {
+      var r = contact.getBoundingClientRect();
+      drawDots(0, r.top, canvas.width, r.height);
     }
   }
 
-  function onScroll() {
-    if (!rafPending) {
-      rafPending = true;
-      requestAnimationFrame(applyPositions);
-    }
-  }
+  function schedule() { if (!raf) raf = requestAnimationFrame(draw); }
 
-  window.opUpdateDotGrids = function() {
-    buildCache();
-    applyPositions();
-  };
-
-  window.addEventListener('scroll', onScroll, {passive: true});
-  window.addEventListener('resize', window.opUpdateDotGrids);
-  window.addEventListener('load', window.opUpdateDotGrids);
-  setTimeout(window.opUpdateDotGrids, 300);
+  window.opUpdateDotGrids = schedule;
+  window.addEventListener('scroll', schedule, {passive: true});
+  window.addEventListener('resize', resize);
+  window.addEventListener('load', schedule);
+  setTimeout(schedule, 300);
+  resize();
 })();
 
 (function(){

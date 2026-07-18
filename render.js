@@ -74,7 +74,6 @@ function opProjTile(p, index, total) {
   return '' +
     '<a class="op-proj" href="project.html?p=' + p.slug + '" id="work-' + p.slug + '">' +
       mediaEl +
-      '<div class="op-proj-dotgrid" style="' + side + ':0"></div>' +
       '<div class="op-proj-ruler" style="' + side + ':0"></div>' +
       '<div class="' + scrimClass + '"></div>' +
       '<span class="op-proj-n" style="' + side + ':clamp(20px,4vw,56px)"><span class="op-proj-n-dot"></span>' + num + ' / ' + tot + '</span>' +
