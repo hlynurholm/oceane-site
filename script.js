@@ -75,7 +75,12 @@
     var contact = document.querySelector('.op-contact');
     if (contact) {
       var r = contact.getBoundingClientRect();
-      drawDots(0, r.top, canvas.width, r.height);
+      var fs = r.top, fe = r.top + r.height * 0.2;
+      drawDots(0, r.top, canvas.width, r.height, function(y) {
+        if (y <= fs) return 0;
+        if (y >= fe) return 1;
+        return (y - fs) / (fe - fs);
+      });
     }
   }
 
