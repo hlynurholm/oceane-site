@@ -34,11 +34,11 @@ a{text-decoration:none}
 .op-proj-scrim-l{position:absolute;inset:0;background:linear-gradient(100deg,rgba(20,19,16,.6) 0%,transparent 42%);pointer-events:none}
 .op-proj-scrim-r{position:absolute;inset:0;background:linear-gradient(260deg,rgba(20,19,16,.6) 0%,transparent 42%);pointer-events:none}
 .op-proj-ruler{position:absolute;top:0;bottom:0;width:16px;background:repeating-linear-gradient(to bottom,rgba(255,252,249,.55) 0 2px,transparent 2px 18px);pointer-events:none}
-.op-proj-n{position:absolute;top:40px;display:flex;align-items:center;gap:8px;font-size:13px;letter-spacing:.06em;color:rgba(255,252,249,.75);white-space:nowrap}
+.op-proj-n{position:absolute;top:40px;display:flex;align-items:center;gap:8px;font-size:13px;letter-spacing:.06em;color:rgba(255,252,249,.75);white-space:nowrap;z-index:6}
 .op-proj-n-dot{width:8px;height:8px;border-radius:50%;background:#82abcc;display:inline-block;animation:opPulse 1.6s ease-in-out infinite}
-.op-proj-timecode{position:absolute;top:66px;font-size:11px;letter-spacing:.06em;color:rgba(255,252,249,.5);white-space:nowrap}
+.op-proj-timecode{position:absolute;top:66px;font-size:11px;letter-spacing:.06em;color:rgba(255,252,249,.5);white-space:nowrap;z-index:6}
 .op-proj-watermark{position:absolute;bottom:-6vw;font-family:'DM Serif Display',serif;font-size:24vw;line-height:1;color:#fffcf9;opacity:.07;pointer-events:none}
-.op-proj-info{position:absolute;bottom:56px}
+.op-proj-info{position:absolute;bottom:56px;z-index:6}
 .op-proj-rule{width:36px;height:1.5px;background:#82abcc;margin-bottom:18px}
 .op-proj-title{font-family:'DM Serif Display',serif;font-weight:400;font-size:clamp(40px,6vw,96px);line-height:1;color:#fffcf9;margin:0;white-space:nowrap}
 .op-proj-kind{font-size:16px;color:rgba(255,252,249,.75);margin-top:14px}
