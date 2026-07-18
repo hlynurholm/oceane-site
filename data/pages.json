@@ -6,5 +6,21 @@
     "h1_is": "Heyrðu í okkur.",
     "back": "← back to work",
     "back_is": "← til baka"
+  },
+  "about": {
+    "tag": "about",
+    "tag_is": "um okkur",
+    "h1": "Lean production. Serious output.",
+    "h1_is": "Létt framleiðsla. Alvöru niðurstöður.",
+    "p1": "I've run Oceane Productions since 2023. Before that, I wasa 6 years at a production company where I worked on TV shows, documentaries, commercials and social media content.",
+    "p1_is": "Ég hef rekið Oceane síðan 2023. Á undan því var ég í sex ár hjá framleiðslufyrirtæki þar sem ég vann að sjónvarpsþáttum, heimildarmyndum, auglýsingum og efni fyrir samfélagsmiðla.",
+    "p2": "I run Oceane by myself, and hire the right people when the project call for it. A lean operation, and the quality stays the high.",
+    "p2_is": "Ég rek Oceane sjálfur og ræð rétta fólkið þegar verkefnið kallar á það. Enginn fastur kostnaður, og gæðin eru þau sömu.",
+    "p3": "It works best with brands and marketing teams who want to move fast without going through an agency. The output is production-company level. The process is not.",
+    "p3_is": "Þetta hentar best vörumerkjum og markaðsteymum sem vilja vinna hratt og fá alvöru niðurstöður. Framleiðslufyrirtæki, gert einfaldar.",
+    "cta": "get in touch",
+    "cta_is": "hafa samband",
+    "back": "← back to work",
+    "back_is": "← til baka"
   }
 }

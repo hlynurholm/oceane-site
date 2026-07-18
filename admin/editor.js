@@ -4,6 +4,7 @@
 // ── State ─────────────────────────────────────────────────────────────────────
 const PAGE = document.getElementById('op-projects') ? 'home'
            : document.getElementById('op-contact-root') ? 'contact'
+           : document.getElementById('op-about-root') ? 'about'
            : 'project';
 let editMode = false, dirty = false;
 let projects = [];
@@ -63,6 +64,8 @@ langEditBtn.addEventListener('click', () => {
       reRenderHome();
     } else if (PAGE === 'contact') {
       if (typeof window.opRefreshContact === 'function') window.opRefreshContact();
+    } else if (PAGE === 'about') {
+      if (typeof window.opRefreshAbout === 'function') window.opRefreshAbout();
     } else {
       const slug = new URLSearchParams(location.search).get('p') || projects[0]?.slug;
       const proj = projects.find(p => p.slug === slug);
@@ -363,6 +366,8 @@ function enterEditMode() {
     setupHomeTileEditing();
   } else if (PAGE === 'contact') {
     setupContactEditing();
+  } else if (PAGE === 'about') {
+    setupAboutEditing();
   } else {
     setupProjectEditing();
   }
@@ -503,6 +508,39 @@ function setupContactEditing() {
       el._opFocus = () => snapshot();
       el._opInput = () => {
         pages.contact[saveKey] = el.innerText.trim();
+        savePages();
+      };
+      el.addEventListener('focus', el._opFocus);
+      el.addEventListener('input', el._opInput);
+    });
+  });
+}
+
+// ── About page editing ────────────────────────────────────────────────────────
+function setupAboutEditing() {
+  let pages = null;
+
+  function savePages() {
+    if (!pages) return;
+    fetch('/api/save-pages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(pages)
+    });
+    markDirty();
+  }
+
+  window.opLoadPages().then(function (data) {
+    pages = data;
+    window.__opPagesOverride = pages;
+
+    document.querySelectorAll('[data-page-field]').forEach(el => {
+      const key = el.dataset.pageField;
+      const saveKey = window.opEditLang === 'is' ? key + '_is' : key;
+      el.contentEditable = 'true';
+      el._opFocus = () => snapshot();
+      el._opInput = () => {
+        pages.about[saveKey] = el.innerText.trim();
         savePages();
       };
       el.addEventListener('focus', el._opFocus);

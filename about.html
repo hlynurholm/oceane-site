@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oceane Productions — about</title>
+<meta name="description" content="About Oceane Productions.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=DM+Serif+Display:ital@0;1&display=swap">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/favicon-180.png">
+<link rel="stylesheet" href="styles.css">
+<style>
+.op-about{min-height:100vh;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:clamp(96px,14vh,140px) clamp(20px,4vw,56px) clamp(40px,8vh,80px);background:#141310;position:relative;overflow:hidden}
+.op-about-tag{position:relative;z-index:6;display:flex;align-items:center;gap:10px;font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,252,249,.55);margin-bottom:28px}
+.op-about-dot{width:8px;height:8px;border-radius:50%;background:#89a7bb;display:inline-block;animation:opPulse 1.6s ease-in-out infinite}
+.op-about h1{position:relative;z-index:6;font-family:'DM Serif Display',serif;font-weight:400;font-size:clamp(36px,5vw,80px);line-height:1.05;color:#fffcf9;margin:0 0 48px;max-width:820px}
+.op-about-body{position:relative;z-index:6;max-width:580px;display:flex;flex-direction:column;gap:22px;margin-bottom:52px}
+.op-about-body p{font-size:clamp(15px,1.15vw,18px);line-height:1.7;color:rgba(255,252,249,.65);margin:0}
+.op-about-back{position:relative;z-index:6;margin-top:28px;display:inline-flex;align-items:center;gap:8px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,252,249,.4);transition:color .2s}
+.op-about-back:hover{color:#fffcf9}
+.op-about .op-btn{position:relative;z-index:6}
+</style>
+</head>
+<body>
+
+<header class="op-header" id="op-header">
+  <a href="index.html"><img src="assets/logo-offwhite.png" alt="Oceane Productions"></a>
+  <div class="op-header-nav">
+    <button id="op-lang-toggle" class="op-lang-btn">IS</button>
+    <a class="op-btn" href="contact.html" data-i18n="nav_contact">contact</a>
+  </div>
+</header>
+
+<main class="op-about" id="op-about-root">
+  <div class="op-about-tag"><span class="op-about-dot"></span><span data-page-field="tag">about</span></div>
+  <h1 data-page-field="h1">Lean production. Serious output.</h1>
+  <div class="op-about-body">
+    <p data-page-field="p1">I've been running Oceane since 2023. Before that, six years at a full-scale production company working across TV shows, documentaries, commercials and social content.</p>
+    <p data-page-field="p2">I run it myself and bring in the right people when the job needs them. Grips, camera operators, assistants. No permanent overhead, no unnecessary structure. The quality stays the same.</p>
+    <p data-page-field="p3">It works best with brands and marketing teams who want to move fast without going through an agency. The output is production-company level. The process is not.</p>
+  </div>
+  <a class="op-btn" href="contact.html" data-page-field="cta">get in touch</a>
+  <a class="op-about-back" href="index.html" data-page-field="back">← back to work</a>
+</main>
+
+<script src="script.js"></script>
+<script src="i18n.js"></script>
+<script>
+(function () {
+  function opAboutField(a, key) {
+    if (window.opLang === 'is' && a[key + '_is']) return a[key + '_is'];
+    return a[key] || '';
+  }
+  function opRenderAbout(pages) {
+    window.__opPagesCache = pages;
+    var a = pages.about || {};
+    document.querySelectorAll('[data-page-field]').forEach(function (el) {
+      el.textContent = opAboutField(a, el.dataset.pageField);
+    });
+    var toggle = document.getElementById('op-lang-toggle');
+    if (toggle) toggle.textContent = window.opLang === 'is' ? 'EN' : 'IS';
+  }
+  window.opLoadPages = function () {
+    if (window.__opPagesOverride) return Promise.resolve(window.__opPagesOverride);
+    if (window.__opPagesCache)    return Promise.resolve(window.__opPagesCache);
+    return fetch('data/pages.json?v=' + Date.now()).then(function (r) { return r.json(); });
+  };
+  window.opRefreshAbout = function () {
+    window.opLoadPages().then(opRenderAbout);
+  };
+  var _orig = window.opSetLang;
+  window.opSetLang = function (lang) {
+    if (_orig) _orig(lang);
+    window.opRefreshAbout();
+  };
+  window.opRefreshAbout();
+})();
+</script>
+</body>
+</html>

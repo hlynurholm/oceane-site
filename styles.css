@@ -56,6 +56,13 @@ a{text-decoration:none}
 .op-icon-btn svg{width:17px;height:17px}
 .op-lang-btn{font-family:'DM Sans',sans-serif;font-weight:500;font-size:13px;letter-spacing:.06em;background:transparent;border:1px solid rgba(255,252,249,.35);color:rgba(255,252,249,.8);border-radius:999px;padding:6px 14px;cursor:pointer;transition:border-color .15s,color .15s}
 .op-lang-btn:hover{border-color:rgba(255,252,249,.7);color:#fffcf9}
+.op-header-nav{display:flex;align-items:center;gap:2px;border:1px solid rgba(255,252,249,.2);border-radius:999px;padding:3px}
+.op-nav-link{font-family:'DM Sans',sans-serif;font-weight:500;font-size:13px;letter-spacing:.06em;color:rgba(255,252,249,.7);padding:6px 12px;transition:color .15s}
+.op-nav-link:hover{color:#fffcf9}
+.op-header-nav .op-lang-btn{border-color:transparent}
+.op-header-nav .op-btn{padding:7px 18px}
+.op-footer-link{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,252,249,.45);transition:color .2s}
+.op-footer-link:hover{color:#fffcf9}
 @media (max-width:720px){.op-proj-title{font-size:clamp(32px,9vw,64px)}}
 .op-d-top{max-width:1200px;margin:0 auto;padding:calc(96px + 32px) clamp(20px,4vw,56px) 32px}
 .op-d-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px}

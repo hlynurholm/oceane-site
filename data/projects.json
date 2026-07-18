@@ -55,10 +55,10 @@
     "kind_is": "",
     "client": "Field Notes Farm",
     "services": "Campaign",
-    "services_is": "",
+    "services_is": "Herferð",
     "year": "2026",
     "description": "A mix of footage and photographs captured for Chitocare in the Forest Lagoon in the north of Iceland.",
-    "description_is": "",
+    "description_is": "Bland af ljósmyndun og hreyfiefni skotið fyrir Chitocare í Skógarböðunum.",
     "media": [
       {
         "type": "image",
@@ -127,7 +127,7 @@
     "services_is": "Auglýsing",
     "year": "2026",
     "description": "A FIFA World Cup advetisement for the online betting copmany Epicbet. With comedy and quality as our hallmarks, this Epicbet spot proves you don't need a big crew to land a big laugh.",
-    "description_is": "Auglýsing í kring um HM í knattspyrnu fyrir veðmálafyrirtækið Epicbet. Með kómík og gæði að leiðarljósi sannar þessi Epicbet-auglýsing að þú þarft ekki stórt crew til að fá alvöru niðurstöður.",
+    "description_is": "Auglýsing í kring um HM í knattspyrnu fyrir veðmálafyrirtækið Epicbet. Með kómík og gæði að leiðarljósi sannar þessi auglýsing að þú þarft ekki stórt crew til að fá alvöru niðurstöður.",
     "media": [
       {
         "type": "video",

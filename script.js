@@ -72,14 +72,25 @@
       });
     }
 
+    var about = document.querySelector('.op-about');
+    if (about) {
+      var r = about.getBoundingClientRect();
+      var fs = r.top + r.height * 0.18, fe = r.top + r.height * 0.42;
+      drawDots(0, r.top, canvas.width, r.height * 0.42, function(y) {
+        if (y <= fs) return 1;
+        if (y >= fe) return 0;
+        return 1 - (y - fs) / (fe - fs);
+      });
+    }
+
     var contact = document.querySelector('.op-contact');
     if (contact) {
       var r = contact.getBoundingClientRect();
-      var fs = r.top, fe = r.top + r.height * 0.2;
-      drawDots(0, r.top, canvas.width, r.height, function(y) {
-        if (y <= fs) return 0;
-        if (y >= fe) return 1;
-        return (y - fs) / (fe - fs);
+      var fs = r.top + r.height * 0.18, fe = r.top + r.height * 0.42;
+      drawDots(0, r.top, canvas.width, r.height * 0.42, function(y) {
+        if (y <= fs) return 1;
+        if (y >= fe) return 0;
+        return 1 - (y - fs) / (fe - fs);
       });
     }
   }
