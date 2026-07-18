@@ -607,7 +607,10 @@ function setupHomeTileEditing() {
 
       // Tile title font-size control (mobile-aware via addTextResizeHandle)
       const titleEl = tile.querySelector('[data-op-field="tileTitle"]');
-      if (titleEl) addTextResizeHandle(titleEl, proj, 'tileTitle');
+      if (titleEl) {
+        makeProjectEditable(titleEl, proj, 'tileTitle');
+        addTextResizeHandle(titleEl, proj, 'tileTitle');
+      }
     });
   });
 }
@@ -1141,7 +1144,8 @@ function makeProjectEditable(el, proj, field) {
   el._opInput = () => {
     const clone = el.cloneNode(true);
     clone.querySelectorAll('.op-text-resize-badge,.op-text-width-handle').forEach(n => n.remove());
-    const saveField = (window.opEditLang === 'is') ? field + '_is' : field;
+    const dataField = field === 'tileTitle' ? 'title' : field;
+    const saveField = (window.opEditLang === 'is') ? dataField + '_is' : dataField;
     proj[saveField] = clone.innerText.trim();
     markDirty();
     // If all real text is gone, the only remaining child may be the contenteditable=false

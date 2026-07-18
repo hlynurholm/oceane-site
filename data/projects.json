@@ -372,7 +372,7 @@
   {
     "slug": "p7",
     "n": "06",
-    "title": "Formula E Heimildamynd",
+    "title": "Formula E Documentary",
     "client": "Andretti",
     "kind": "Andretti Formula E Team",
     "services": "Documentary",
@@ -415,7 +415,8 @@
     ],
     "coverStreamUid": "7bcbac1a8dd368fb504008d0899385dc",
     "coverWidth": 3840,
-    "coverHeight": 1920
+    "coverHeight": 1920,
+    "title_is": "Chitocare brand-mynd"
   },
   {
     "slug": "p13",
