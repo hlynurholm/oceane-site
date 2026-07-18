@@ -7,6 +7,63 @@
 })();
 
 (function(){
+  var nav = document.querySelector('.op-header-nav');
+  var right = document.querySelector('.op-header-right');
+  if (!nav || !right) return;
+
+  // Hamburger button
+  var btn = document.createElement('button');
+  btn.className = 'op-hamburger';
+  btn.setAttribute('aria-label', 'Menu');
+  btn.innerHTML = '<span></span><span></span><span></span>';
+  right.appendChild(btn);
+
+  // Menu panel — clone links from the nav pill so active state carries over
+  var menu = document.createElement('div');
+  menu.className = 'op-mob-nav';
+
+  // Close button (X) at top of menu
+  var closeBtn = document.createElement('button');
+  closeBtn.className = 'op-mob-nav-x';
+  closeBtn.setAttribute('aria-label', 'Close menu');
+  closeBtn.innerHTML = '<span></span><span></span><span></span>';
+  menu.appendChild(closeBtn);
+
+  nav.querySelectorAll('.op-nav-link').forEach(function(link) {
+    var a = link.cloneNode(true);
+    a.addEventListener('click', close);
+    menu.appendChild(a);
+  });
+  document.body.appendChild(menu);
+
+  var isOpen = false;
+  function open() {
+    var r = btn.getBoundingClientRect();
+    menu.style.top   = r.top + 'px';
+    menu.style.right = (window.innerWidth - r.right) + 'px';
+    isOpen = true;
+    menu.classList.add('op-mob-nav-open');
+    btn.style.opacity = '0';
+    btn.style.pointerEvents = 'none';
+  }
+  function close() {
+    isOpen = false;
+    menu.classList.remove('op-mob-nav-open');
+    btn.style.opacity = '1';
+    btn.style.pointerEvents = '';
+  }
+
+  closeBtn.addEventListener('click', function(e) { e.stopPropagation(); close(); });
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    isOpen ? close() : open();
+  });
+  document.addEventListener('click', function(e) {
+    if (isOpen && !menu.contains(e.target)) close();
+  });
+})();
+
+(function(){
   var canvas = document.createElement('canvas');
   canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:difference;z-index:5';
   document.body.appendChild(canvas);
