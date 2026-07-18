@@ -7,6 +7,8 @@
   // as title_is, description_is, kind_is, services_is fields.
   window.opTranslations = {
     en: {
+      nav_home:         'home',
+      nav_about:        'about',
       nav_contact:      'contact',
       hero_h1:          'Professional production,<br>made simple.',
       hero_sub:         'Direct, efficient production for brands who want results without the overhead. Streamlined from first call to delivery. Based in Iceland, working worldwide.',
@@ -19,7 +21,9 @@
       detail_year:      'Year',
     },
     is: {
-      nav_contact:      'hafa samband',
+      nav_home:         'heim',
+      nav_about:        'um',
+      nav_contact:      'samband',
       footer_tag:       '07 / 06 — við tökum í gegn',
       footer_cta:       'hafa samband',
       detail_back:      '← Öll verkefni',
