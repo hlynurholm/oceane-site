@@ -20,17 +20,18 @@
   }
 
   function drawDots(clipX, clipY, clipW, clipH, alphaFn) {
-    if (clipW <= 0 || clipH <= 0) return;
     var vw = canvas.width, vh = canvas.height;
-    var x0 = Math.floor(Math.max(0, clipX) / GRID) * GRID;
-    var y0 = Math.floor(Math.max(0, clipY) / GRID) * GRID;
-    var x1 = Math.min(vw, clipX + clipW);
-    var y1 = Math.min(vh, clipY + clipH);
+    var cx = Math.max(0, clipX), cy = Math.max(0, clipY);
+    var cx2 = Math.min(vw, clipX + clipW), cy2 = Math.min(vh, clipY + clipH);
+    if (cx2 <= cx || cy2 <= cy) return;
+    ctx.save();
     ctx.beginPath();
-    for (var y = y0; y <= y1; y += GRID) {
-      if (y < 0 || y > vh) continue;
-      for (var x = x0; x <= x1; x += GRID) {
-        if (x < 0 || x > vw) continue;
+    ctx.rect(cx, cy, cx2 - cx, cy2 - cy);
+    ctx.clip();
+    var x0 = Math.floor(cx / GRID) * GRID;
+    var y0 = Math.floor(cy / GRID) * GRID;
+    for (var y = y0; y <= cy2 + GRID; y += GRID) {
+      for (var x = x0; x <= cx2 + GRID; x += GRID) {
         var alpha = alphaFn ? alphaFn(y) : 1;
         if (alpha <= 0) continue;
         ctx.globalAlpha = alpha;
@@ -40,6 +41,7 @@
       }
     }
     ctx.globalAlpha = 1;
+    ctx.restore();
   }
 
   function draw() {
