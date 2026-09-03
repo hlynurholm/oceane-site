@@ -81,25 +81,6 @@ app.get('/api/projects', (req, res) => {
   res.json(JSON.parse(fs.readFileSync(path.join(SITE, 'data', 'projects.json'), 'utf8')));
 });
 
-// Backfill missing width/height for image media items from disk
-app.post('/api/backfill-dimensions', async (req, res) => {
-  const fp = path.join(SITE, 'data', 'projects.json');
-  const projects = JSON.parse(fs.readFileSync(fp, 'utf8'));
-  let filled = 0;
-  for (const proj of projects) {
-    for (const item of (proj.media || [])) {
-      if (item.type === 'image' && item.src && (!item.width || !item.height)) {
-        try {
-          const meta = await sharp(path.join(SITE, 'assets', 'photos', item.src)).metadata();
-          item.width = meta.width; item.height = meta.height; filled++;
-        } catch {}
-      }
-    }
-  }
-  fs.writeFileSync(fp, JSON.stringify(projects, null, 2));
-  res.json({ ok: true, filled });
-});
-
 app.post('/api/save-projects', (req, res) => {
   try {
     fs.writeFileSync(path.join(SITE, 'data', 'projects.json'), JSON.stringify(req.body, null, 2));

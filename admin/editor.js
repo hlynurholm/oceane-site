@@ -11,8 +11,6 @@ let projects = [];
 let indexEdits = [];  // [{selector, html?, attr?}] for index.html
 let history = [];
 let staticEditingAttached = false;
-let mobileEditMode = false;
-const mobileRefreshFns = [];
 let currentPhoneIdx = 0;
 
 // ── Toolbar ───────────────────────────────────────────────────────────────────
@@ -187,7 +185,6 @@ const newProjModal = createModal(`
   <p class="op-modal-title">New Project</p>
   <p class="op-modal-sub">You can add photos and video after creating the project.</p>
   <div class="op-modal-row"><label class="op-modal-label">Title</label><input class="op-modal-input" id="np-title" placeholder="Northwind"></div>
-  <div class="op-modal-row"><label class="op-modal-label">Client</label><input class="op-modal-input" id="np-client" placeholder="Northwind Outfitters"></div>
   <div class="op-modal-row"><label class="op-modal-label">Kind</label><input class="op-modal-input" id="np-kind" placeholder="Brand film"></div>
   <div class="op-modal-row"><label class="op-modal-label">Services</label><input class="op-modal-input" id="np-services" placeholder="Commercial, 4K"></div>
   <div class="op-modal-row"><label class="op-modal-label">Year</label><input class="op-modal-input" id="np-year" placeholder="${new Date().getFullYear()}"></div>
@@ -215,9 +212,8 @@ document.body.appendChild(toast);
 // ── Mobile preview panel ──────────────────────────────────────────────────────
 const PHONES = [
   { label: 'iPhone 17 Pro Max',      w: 440, h: 956 },
-  { label: 'iPhone 17 Pro',          w: 393, h: 852 },
   { label: 'iPhone 17 Plus',         w: 430, h: 932 },
-  { label: 'iPhone 17',              w: 393, h: 852 },
+  { label: 'iPhone 17 / 17 Pro',     w: 393, h: 852 },
   { label: 'Samsung S25 Ultra',      w: 412, h: 915 },
   { label: 'Samsung S25',            w: 360, h: 780 },
   { label: 'Galaxy Fold 8 (closed)', w: 373, h: 844 },
@@ -231,7 +227,6 @@ mobilePanel.innerHTML =
   '<div id="op-mob-resize"></div>' +
   '<div id="op-mob-ph">' +
     '<select id="op-phone-sel">' + PHONES.map((p,i) => `<option value="${i}">${p.label}</option>`).join('') + '</select>' +
-    '<button class="op-edit-btn" id="op-mob-edit">Edit mobile</button>' +
     '<button class="op-edit-btn" id="op-mob-refresh" title="Reload preview">↻</button>' +
     '<button class="op-edit-btn" id="op-mob-close">✕</button>' +
   '</div>' +
@@ -261,8 +256,6 @@ mobResizeHandle.addEventListener('mousedown', e => {
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 async function init() {
-  // Backfill any image items missing dimensions, then load fresh data
-  await fetch('/api/backfill-dimensions', { method: 'POST' }).catch(() => {});
   const r = await fetch('/api/projects');
   projects = await r.json();
   updateUndoBtn();
@@ -336,7 +329,6 @@ window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); 
 
 // ── Mobile panel events ───────────────────────────────────────────────────────
 const mobBtn    = $('op-mob-btn');
-const mobEdit   = $('op-mob-edit');
 const phoneSel  = $('op-phone-sel');
 const mobIframe = $('op-mob-iframe');
 
@@ -344,20 +336,18 @@ mobBtn.addEventListener('click', () => {
   mobilePanel.hidden = !mobilePanel.hidden;
   if (!mobilePanel.hidden) loadMobileIframe();
 });
-$('op-mob-close').addEventListener('click', () => { mobilePanel.hidden = true; setMobileEditMode(false); });
+$('op-mob-close').addEventListener('click', () => { mobilePanel.hidden = true; });
 $('op-mob-refresh').addEventListener('click', loadMobileIframe);
 phoneSel.addEventListener('change', () => {
   currentPhoneIdx = parseInt(phoneSel.value);
   scaleMobileFrame();
   loadMobileIframe();
 });
-mobEdit.addEventListener('click', () => setMobileEditMode(!mobileEditMode));
-mobIframe.addEventListener('load', () => { scaleMobileFrame(); syncMobileStylesToIframe(); });
+mobIframe.addEventListener('load', () => { scaleMobileFrame(); hideEditBarInIframe(); });
 
 // ── Edit mode ─────────────────────────────────────────────────────────────────
 function enterEditMode() {
   editMode = true;
-  mobileRefreshFns.length = 0;
   toggleBtn.textContent = 'Viewing';
   toggleBtn.classList.add('op-edit-toggle-active');
   document.body.classList.add('op-edit-mode');
@@ -385,7 +375,7 @@ function exitEditMode() {
   });
   document.querySelectorAll(
     '.op-img-replace, .op-media-remove, .op-media-add-row, .op-tile-controls, .op-hero-controls,' +
-    '.op-video-url-btn, .op-drag-ring, .op-resize-handle, .op-drag-tooltip, .op-text-resize-badge, .op-text-width-handle'
+    '.op-drag-ring, .op-resize-handle, .op-drag-tooltip, .op-text-resize-badge, .op-text-width-handle'
   ).forEach(el => el.remove());
   document.querySelectorAll('[data-op-field]').forEach(el => { el.style.position = ''; el.style.maxWidth = ''; });
   document.querySelectorAll('.op-proj-info').forEach(el => { el.style.width = ''; el.style.transform = ''; el.style.left = ''; el.style.right = ''; });
@@ -412,14 +402,12 @@ function setupHomeStaticEditing() {
     '.op-hero h1':     'hero_h1_is',
     '.op-hero-sub':    'hero_sub_is',
     '.op-footer h2':   'footer_h2_is',
-    '.op-footer-note': 'footer_note_is',
   };
 
   [
     ['.op-hero h1',       '.op-hero h1'],
     ['.op-hero-sub',      '.op-hero-sub'],
     ['.op-footer h2',     '.op-footer h2'],
-    ['.op-footer-note',   '.op-footer-note'],
   ].forEach(([sel, saveSel]) => {
     const el = document.querySelector(sel);
     if (!el) return;
@@ -503,12 +491,12 @@ function setupHomeStaticEditing() {
 
   // Draggable + resizable overlay elements
   const logo = document.querySelector('.op-hero-logo');
-  if (logo) makeDraggableResizable(logo, '.op-hero-logo', 'index.html');
+  if (logo) makeDraggableResizable(logo, '.op-hero-logo');
 
   // Buttons — resize only (drag would break the flex layout)
   document.querySelectorAll('.op-header .op-btn, .op-footer-cta .op-btn').forEach((btn, i) => {
     const sel = btn.closest('.op-header') ? '.op-header .op-btn' : '.op-footer-cta .op-btn';
-    makeResizable(btn, sel, 'index.html');
+    makeResizable(btn, sel);
   });
 }
 
@@ -698,7 +686,6 @@ function attachProjectEditing() {
         if (bg) bg.style.backgroundImage = `url(assets/photos/${fn})`;
         markDirty();
       });
-      addVideoUrlBtn(el, item);
       const rm = makeRemoveBtn(() => removeMedia(proj, idx));
       el.appendChild(rm);
     }
@@ -822,7 +809,6 @@ function removeMedia(proj, idx) {
 }
 
 function reRenderProject(proj) {
-  mobileRefreshFns.length = 0;
   window.__opProjectsOverride = projects;
   const root = document.getElementById('op-detail-root');
   if (root) root.innerHTML = '';
@@ -831,7 +817,6 @@ function reRenderProject(proj) {
 }
 
 function reRenderHome() {
-  mobileRefreshFns.length = 0;
   window.__opProjectsOverride = projects;
   const root = document.getElementById('op-projects');
   if (root) root.innerHTML = '';
@@ -842,7 +827,6 @@ function reRenderHome() {
 // ── Project management ────────────────────────────────────────────────────────
 function createProject() {
   const title    = $('np-title').value.trim();
-  const client   = $('np-client').value.trim();
   const kind     = $('np-kind').value.trim();
   const services = $('np-services').value.trim();
   const year     = $('np-year').value.trim() || String(new Date().getFullYear());
@@ -855,13 +839,13 @@ function createProject() {
   const slug = 'p' + (maxNum + 1);
 
   snapshot();
-  projects.push({ slug, n: '', title, client, kind, services, year, description: desc, media: [] });
+  projects.push({ slug, n: '', title, kind, services, year, description: desc, media: [] });
   renumberProjects();
   markDirty();
   newProjModal.hidden = true;
 
   // Clear form
-  ['np-title','np-client','np-kind','np-services','np-year','np-desc'].forEach(id => { $(id).value = ''; });
+  ['np-title','np-kind','np-services','np-year','np-desc'].forEach(id => { $(id).value = ''; });
 
   reRenderHome();
   showToast(`"${title}" created — click Edit → to add photos`);
@@ -897,15 +881,13 @@ function renumberProjects() {
 // ── Text style helpers ────────────────────────────────────────────────────────
 function getFieldStyles(proj, field) {
   if (!proj.styles) proj.styles = {};
-  const s = proj.styles[field];
-  if (!s) return {};
-  return typeof s === 'string' ? { fontSize: s } : Object.assign({}, s);
+  return Object.assign({}, proj.styles[field] || {});
 }
 function setFieldStyles(proj, field, styles) {
   if (!proj.styles) proj.styles = {};
   const keys = Object.keys(styles).filter(k => styles[k]);
   if (!keys.length) { delete proj.styles[field]; return; }
-  proj.styles[field] = keys.length === 1 && keys[0] === 'fontSize' ? styles.fontSize : styles;
+  proj.styles[field] = styles;
 }
 
 // ── Text resize (font-size badge) ─────────────────────────────────────────────
@@ -925,22 +907,11 @@ function addTextResizeHandle(el, proj, field) {
     '<button class="op-text-resize-btn op-text-resize-auto" data-auto="1">Auto</button>';
 
   function readPx() { return parseFloat(getComputedStyle(el).fontSize); }
-  function getMobileFs() {
-    if (!proj.mobileStyles || !proj.mobileStyles[field]) return null;
-    const ms = proj.mobileStyles[field];
-    return typeof ms === 'string' ? ms : ms.fontSize;
-  }
 
   function refresh() {
-    if (mobileEditMode) {
-      const fs = getMobileFs();
-      badge.querySelector('.op-text-resize-val').textContent = fs ? Math.round(parseFloat(fs)) + 'px' : 'auto';
-      badge.querySelector('.op-text-resize-auto').classList.toggle('op-text-resize-auto-on', !fs);
-    } else {
-      const isAuto = !el.style.fontSize;
-      badge.querySelector('.op-text-resize-val').textContent = isAuto ? 'auto' : Math.round(parseFloat(el.style.fontSize)) + 'px';
-      badge.querySelector('.op-text-resize-auto').classList.toggle('op-text-resize-auto-on', isAuto);
-    }
+    const isAuto = !el.style.fontSize;
+    badge.querySelector('.op-text-resize-val').textContent = isAuto ? 'auto' : Math.round(parseFloat(el.style.fontSize)) + 'px';
+    badge.querySelector('.op-text-resize-auto').classList.toggle('op-text-resize-auto-on', isAuto);
   }
 
   badge.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); });
@@ -950,34 +921,21 @@ function addTextResizeHandle(el, proj, field) {
     if (!btn) return;
     e.preventDefault(); e.stopPropagation();
     snapshot();
-    if (mobileEditMode) {
-      if (!proj.mobileStyles) proj.mobileStyles = {};
-      if (btn.dataset.auto) {
-        delete proj.mobileStyles[field];
-      } else {
-        const curFs = getMobileFs();
-        const basePx = curFs ? parseFloat(curFs) : readPx();
-        proj.mobileStyles[field] = Math.max(8, Math.round(basePx + parseInt(btn.dataset.step))) + 'px';
-      }
-      syncMobileStylesToIframe();
+    const styles = getFieldStyles(proj, field);
+    if (btn.dataset.auto) {
+      el.style.fontSize = '';
+      delete styles.fontSize;
     } else {
-      const styles = getFieldStyles(proj, field);
-      if (btn.dataset.auto) {
-        el.style.fontSize = '';
-        delete styles.fontSize;
-      } else {
-        const next = Math.max(8, Math.round(readPx() + parseInt(btn.dataset.step)));
-        el.style.fontSize = next + 'px';
-        styles.fontSize = next + 'px';
-      }
-      setFieldStyles(proj, field, styles);
+      const next = Math.max(8, Math.round(readPx() + parseInt(btn.dataset.step)));
+      el.style.fontSize = next + 'px';
+      styles.fontSize = next + 'px';
     }
+    setFieldStyles(proj, field, styles);
     refresh();
     markDirty();
   });
 
   refresh();
-  mobileRefreshFns.push(refresh);
   wrap.appendChild(badge);
   el.style.position = 'relative';
   if (field !== 'tileTitle') addTextWidthHandle(el, proj, field);
@@ -1157,15 +1115,6 @@ function addIndexTextResizeHandle(el, selector) {
 }
 
 // ── Editable text ─────────────────────────────────────────────────────────────
-function makeIndexEditable(el, selector) {
-  if (!el) return;
-  el.contentEditable = 'true';
-  el._opFocus = () => snapshot();
-  el._opInput = () => { setIndexHtml(selector, el.innerHTML); markDirty(); };
-  el.addEventListener('focus', el._opFocus);
-  el.addEventListener('input', el._opInput);
-}
-
 function makeProjectEditable(el, proj, field) {
   if (!el) return;
   el.contentEditable = 'true';
@@ -1214,7 +1163,7 @@ function setIndexAttr(selector, name, value) {
   Drag updates top/left as % of the offsetParent. Resize handle (SE corner)
   updates width in px. Both save back to the HTML file as inline style.
 */
-function makeDraggableResizable(el, cssSelector, file) {
+function makeDraggableResizable(el, cssSelector) {
   el.classList.add('op-draggable');
   el.style.position = el.style.position || 'absolute'; // keep existing if set
 
@@ -1297,7 +1246,7 @@ function makeDraggableResizable(el, cssSelector, file) {
   makeResizable: for in-flow elements (buttons). Uses transform:scale() so
   it doesn't affect layout. Also allows nudging position with translate.
 */
-function makeResizable(el, cssSelector, file) {
+function makeResizable(el, cssSelector) {
   el.classList.add('op-draggable');
   el.style.display = el.style.display || 'inline-flex';
 
@@ -1383,24 +1332,6 @@ function makeRemoveBtn(onClick) {
   btn.title = 'Remove';
   btn.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); onClick(); });
   return btn;
-}
-
-function addVideoUrlBtn(el, item) {
-  // Only shown for non-Stream videos (poster+url style)
-  if (item.streamUid) return;
-  const btn = document.createElement('button');
-  btn.className = 'op-img-replace op-video-url-btn';
-  btn.textContent = item.url ? 'Edit video URL' : '+ Video URL';
-  btn.addEventListener('click', e => {
-    e.preventDefault(); e.stopPropagation();
-    const url = prompt('Video URL (Vimeo, YouTube, mp4):', item.url || '');
-    if (url === null) return;
-    snapshot();
-    item.url = url.trim();
-    btn.textContent = item.url ? 'Edit video URL' : '+ Video URL';
-    markDirty();
-  });
-  el.appendChild(btn);
 }
 
 // Open Stream picker and resolve with selected video object (or null)
@@ -1665,13 +1596,6 @@ async function loadSnapsPanel() {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function markDirty() { dirty = true; }
 
-function setMobileEditMode(on) {
-  mobileEditMode = on;
-  mobEdit.classList.toggle('op-mob-edit-active', on);
-  mobEdit.textContent = on ? 'Mobile ON' : 'Edit mobile';
-  mobileRefreshFns.forEach(fn => fn());
-}
-
 function loadMobileIframe() {
   mobIframe.src = location.pathname + location.search;
 }
@@ -1689,27 +1613,15 @@ function scaleMobileFrame() {
   mobIframe.style.height = phone.h + 'px';
 }
 
-function generateMobileCSS(projs) {
-  const rules = [];
-  projs.forEach(p => {
-    if (!p.mobileStyles) return;
-    const ms = p.mobileStyles;
-    if (ms.tileTitle) {
-      const v = typeof ms.tileTitle === 'string' ? ms.tileTitle : ms.tileTitle.fontSize;
-      if (v) rules.push('#work-' + p.slug + ' .op-proj-title{font-size:' + v + '}');
-    }
-  });
-  return rules.length ? '@media(max-width:640px){' + rules.join('') + '}' : '';
-}
-
-function syncMobileStylesToIframe() {
+// Hide the editor chrome inside the phone preview iframe.
+function hideEditBarInIframe() {
   try {
     const iDoc = mobIframe.contentDocument;
     if (!iDoc || !iDoc.head) return;
-    let s = iDoc.getElementById('op-mob-styles');
-    if (!s) { s = iDoc.createElement('style'); s.id = 'op-mob-styles'; iDoc.head.appendChild(s); }
-    s.textContent = '#op-edit-bar{display:none!important}body{padding-top:0!important}' + generateMobileCSS(projects);
-  } catch(e) {}
+    let st = iDoc.getElementById('op-mob-styles');
+    if (!st) { st = iDoc.createElement('style'); st.id = 'op-mob-styles'; iDoc.head.appendChild(st); }
+    st.textContent = '#op-edit-bar{display:none!important}body{padding-top:0!important}';
+  } catch (e) {}
 }
 
 function waitFor(selector, callback) {

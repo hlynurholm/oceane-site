@@ -9,8 +9,6 @@ function opField(proj, field) {
 function opFs(proj, field) {
   var s = proj.styles && proj.styles[field];
   if (!s) return '';
-  // legacy: stored as plain string (font-size only)
-  if (typeof s === 'string') return ' style="font-size:' + s + '"';
   var parts = [];
   if (s.fontSize) parts.push('font-size:' + s.fontSize);
   if (s.width)    parts.push('width:' + s.width);
@@ -34,7 +32,7 @@ function opGroupMedia(items) {
 function opLoadProjects() {
   if (window.__opProjectsOverride) return Promise.resolve(window.__opProjectsOverride);
   if (window.__opProjectsCache)    return Promise.resolve(window.__opProjectsCache);
-  return fetch('data/projects.json?v=' + Date.now()).then(function(r) { return r.json(); }).then(function(d) {
+  return fetch('data/projects.json').then(function(r) { return r.json(); }).then(function(d) {
     window.__opProjectsCache = d;
     return d;
   });
@@ -161,25 +159,6 @@ function opBuildHeroStrip(projects) {
   document.dispatchEvent(new Event('op-hero-ready'));
 }
 
-function opInjectMobileStyles(projects) {
-  var prev = document.getElementById('op-mobile-styles');
-  if (prev) prev.remove();
-  var rules = [];
-  projects.forEach(function(proj) {
-    if (!proj.mobileStyles) return;
-    var ms = proj.mobileStyles;
-    if (ms.tileTitle) {
-      var v = typeof ms.tileTitle === 'string' ? ms.tileTitle : ms.tileTitle.fontSize;
-      if (v) rules.push('#work-' + proj.slug + ' .op-proj-title{font-size:' + v + '}');
-    }
-  });
-  if (!rules.length) return;
-  var s = document.createElement('style');
-  s.id = 'op-mobile-styles';
-  s.textContent = '@media(max-width:640px){' + rules.join('') + '}';
-  document.head.appendChild(s);
-}
-
 function opRenderHome() {
   var root = document.getElementById('op-projects');
   if (!root) return;
@@ -187,34 +166,20 @@ function opRenderHome() {
     var total = projects.length;
     root.innerHTML = projects.map(function(p, i) { return opProjTile(p, i, total); }).join('');
     opBuildHeroStrip(projects);
-    opInjectMobileStyles(projects);
     if (window.opUpdateDotGrids) window.opUpdateDotGrids();
   });
 }
 
 function opVideoBlockHtml(item, idx) {
   var idxAttr = idx !== undefined ? ' data-op-media-idx="' + idx + '"' : '';
-  // Cloudflare Stream: embed as an autoplay/muted/loop iframe
-  if (item.streamUid) {
-    var src = 'https://iframe.videodelivery.net/' + item.streamUid +
-              '?controls=true&muted=false&autoplay=false&loop=false&preload=metadata';
-    var arStyle = (item.width && item.height)
-      ? ' style="aspect-ratio:' + item.width + '/' + item.height + '"'
-      : '';
-    return '' +
-      '<div class="op-d-video op-d-stream"' + idxAttr + arStyle + '>' +
-        '<iframe src="' + src + '" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="border:none;width:100%;height:100%;position:absolute;inset:0"></iframe>' +
-      '</div>';
-  }
-  // Fallback: static poster + play button
-  var playEl = item.url
-    ? '<a class="op-d-play" href="' + item.url + '" target="_blank" rel="noopener"><img src="assets/icons/play.svg" alt="Play"></a>'
-    : '<div class="op-d-play"><img src="assets/icons/play.svg" alt=""></div>';
+  var src = 'https://iframe.videodelivery.net/' + item.streamUid +
+            '?controls=true&muted=false&autoplay=false&loop=false&preload=metadata';
+  var arStyle = (item.width && item.height)
+    ? ' style="aspect-ratio:' + item.width + '/' + item.height + '"'
+    : '';
   return '' +
-    '<div class="op-d-video"' + idxAttr + '>' +
-      '<div class="op-d-video-media" style="background-image:url(assets/photos/' + (item.poster || '') + ')"></div>' +
-      '<div class="op-d-video-scrim"></div>' +
-      playEl +
+    '<div class="op-d-video op-d-stream"' + idxAttr + arStyle + '>' +
+      '<iframe src="' + src + '" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="border:none;width:100%;height:100%;position:absolute;inset:0"></iframe>' +
     '</div>';
 }
 

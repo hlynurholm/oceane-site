@@ -6,7 +6,6 @@
     "title_is": "",
     "kind": "Íslandsbanki",
     "kind_is": "",
-    "client": "Fjárhagsleg heilsa",
     "services": "Commercial",
     "services_is": "Auglýsing",
     "year": "2026",
@@ -42,7 +41,9 @@
     ],
     "bgPosition": "58.2% 35.0%",
     "styles": {
-      "description": "30px"
+      "description": {
+        "fontSize": "30px"
+      }
     },
     "year_is": "2025"
   },
@@ -53,7 +54,6 @@
     "title_is": "",
     "kind": "Chitocare",
     "kind_is": "",
-    "client": "Field Notes Farm",
     "services": "Campaign",
     "services_is": "Herferð",
     "year": "2026",
@@ -122,7 +122,6 @@
     "title_is": "HM í Fótbolta",
     "kind": "Epicbet",
     "kind_is": "",
-    "client": "Epicbet",
     "services": "Commercial",
     "services_is": "Auglýsing",
     "year": "2026",
@@ -156,7 +155,6 @@
     "title_is": "",
     "kind": "Photography",
     "kind_is": "Ljósmyndun",
-    "client": "Harbor Co.",
     "services": "Social media",
     "services_is": "Samfélagsmiðlar",
     "year": "2023-2026",
@@ -284,7 +282,6 @@
     "slug": "p6",
     "n": "05",
     "title": "Nocco Electrolyte",
-    "client": "Core Heildsala",
     "kind": "Core Heildsala",
     "services": "Auglýsing",
     "year": "2026",
@@ -373,7 +370,6 @@
     "slug": "p7",
     "n": "06",
     "title": "Formula E Documentary",
-    "client": "Andretti",
     "kind": "Andretti Formula E Team",
     "services": "Documentary",
     "year": "2024",
@@ -389,7 +385,9 @@
       }
     ],
     "styles": {
-      "description": "18px"
+      "description": {
+        "fontSize": "18px"
+      }
     },
     "services_is": "Heimildamynd",
     "bgPosition": "49.4% 63.3%"
@@ -398,7 +396,6 @@
     "slug": "p8",
     "n": "07",
     "title": "Chitocare Brand Movie",
-    "client": "Chitocare",
     "kind": "Chitocare",
     "services": "Brand Film",
     "year": "2025",
@@ -422,7 +419,6 @@
     "slug": "p13",
     "n": "08",
     "title": "Formula E Evo Sessions",
-    "client": "Spacesuit",
     "kind": "Spacesuit",
     "services": "Recap",
     "year": "2024",
@@ -436,7 +432,6 @@
     "slug": "p9",
     "n": "09",
     "title": "Herra í Höllinni",
-    "client": "Herra Hnetusmjör",
     "kind": "Herra Hnetusmjör",
     "services": "Aftermovie",
     "year": "2026",
@@ -459,7 +454,6 @@
     "slug": "p11",
     "n": "10",
     "title": "Apótekarinn",
-    "client": "Apótekarinn",
     "kind": "Rebrand",
     "services": "Campaign",
     "year": "2026",
@@ -530,7 +524,6 @@
     "slug": "p10",
     "n": "11",
     "title": "FM95Blö",
-    "client": "FM95Blö",
     "kind": "Tónleikatilkynning",
     "services": "Auglýsing",
     "year": "2026",
@@ -553,7 +546,6 @@
     "slug": "p12",
     "n": "12",
     "title": "2025 Abu Dhabi Grand Prix",
-    "client": "16K Agency",
     "kind": "16K Agency / F1 Experiences",
     "services": "Aftermovie",
     "year": "2025",

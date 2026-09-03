@@ -51,7 +51,6 @@
     return c[key] || '';
   }
   function opRenderContact(pages) {
-    window.__opPagesCache = pages;
     var c = pages.contact || {};
     document.querySelectorAll('[data-page-field]').forEach(function (el) {
       el.textContent = opContactField(c, el.dataset.pageField);
@@ -59,11 +58,6 @@
     var toggle = document.getElementById('op-lang-toggle');
     if (toggle) toggle.textContent = window.opLang === 'is' ? 'EN' : 'IS';
   }
-  window.opLoadPages = function () {
-    if (window.__opPagesOverride) return Promise.resolve(window.__opPagesOverride);
-    if (window.__opPagesCache)    return Promise.resolve(window.__opPagesCache);
-    return fetch('data/pages.json?v=' + Date.now()).then(function (r) { return r.json(); });
-  };
   window.opRefreshContact = function () {
     window.opLoadPages().then(opRenderContact);
   };

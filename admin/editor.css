@@ -232,11 +232,6 @@ body.op-edit-mode [contenteditable]:focus {
 }
 
 /* ── Video URL button — sits below the replace button ───────────────────────── */
-.op-video-url-btn {
-  top: 50px;  /* below the Replace photo button */
-  font-size: 11px;
-  padding: 6px 14px;
-}
 
 /* ── Gallery image cells ────────────────────────────────────────────────────── */
 .op-img-cell { position: relative; }
@@ -648,4 +643,3 @@ body.op-edit-mode .op-draggable.op-active .op-drag-tooltip { opacity: 1; }
 }
 #op-mob-frame { transform-origin: top center; flex-shrink: 0; }
 #op-mob-iframe { border: none; display: block; border-radius: 8px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,252,249,.08); }
-.op-mob-edit-active { background: #1b5294 !important; color: #fffcf9 !important; border-color: #1b5294 !important; }

@@ -57,7 +57,6 @@
     return a[key] || '';
   }
   function opRenderAbout(pages) {
-    window.__opPagesCache = pages;
     var a = pages.about || {};
     document.querySelectorAll('[data-page-field]').forEach(function (el) {
       el.textContent = opAboutField(a, el.dataset.pageField);
@@ -65,11 +64,6 @@
     var toggle = document.getElementById('op-lang-toggle');
     if (toggle) toggle.textContent = window.opLang === 'is' ? 'EN' : 'IS';
   }
-  window.opLoadPages = function () {
-    if (window.__opPagesOverride) return Promise.resolve(window.__opPagesOverride);
-    if (window.__opPagesCache)    return Promise.resolve(window.__opPagesCache);
-    return fetch('data/pages.json?v=' + Date.now()).then(function (r) { return r.json(); });
-  };
   window.opRefreshAbout = function () {
     window.opLoadPages().then(opRenderAbout);
   };

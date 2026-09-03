@@ -14,7 +14,6 @@
       hero_sub:         'Direct, efficient production for brands who want results without the overhead. Streamlined from first call to delivery. Based in Iceland, working worldwide.',
       footer_tag:       "07 / 06 — let's talk",
       footer_h2:        'Got a shoot coming up?',
-      footer_note:      'Budgets are small. Egos are too.',
       footer_cta:       'contact',
       detail_back:      '← All projects',
       detail_services:  'Services',
@@ -30,6 +29,17 @@
       detail_services:  'Þjónusta',
       detail_year:      'Ár',
     }
+  };
+
+  // ── Shared page-copy loader ───────────────────────────────────────────────────
+  // data/pages.json holds the about/contact copy and the Icelandic overrides for
+  // the homepage. _headers sends no-cache for /data/*, so no cache-buster needed.
+  window.opLoadPages = function () {
+    if (window.__opPagesOverride) return Promise.resolve(window.__opPagesOverride);
+    if (window.__opPagesCache)    return Promise.resolve(window.__opPagesCache);
+    return fetch('data/pages.json')
+      .then(function (r) { return r.json(); })
+      .then(function (d) { window.__opPagesCache = d; return d; });
   };
 
   // ── Language state ────────────────────────────────────────────────────────────
