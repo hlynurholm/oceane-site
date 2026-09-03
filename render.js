@@ -16,8 +16,13 @@ function opFs(proj, field) {
   return parts.length ? ' style="' + parts.join(';') + '"' : '';
 }
 
-// Cloudflare Stream serves a still for any video, so we can show a poster
-// wherever a live player isn't worth its cost.
+// ── Cloudflare Stream players ────────────────────────────────────────────────
+// Browsers only decode so many videos at once, and every live player keeps
+// pulling segments whether or not anyone can see it. So no player is ever
+// mounted unless its element is actually on screen, and every one is torn down
+// the moment it isn't. Elements carry data-stream-uid and show the video's
+// still until their player arrives.
+
 function opStreamThumb(uid, height) {
   return 'https://videodelivery.net/' + uid + '/thumbnails/thumbnail.jpg?time=1s' +
          (height ? '&height=' + height : '');
@@ -29,43 +34,48 @@ function opStreamEmbed(uid, poster) {
          (poster ? '&poster=' + encodeURIComponent(poster) : '');
 }
 
-// Mobile browsers cap how many videos they will decode at once. The page used
-// to mount 25 Stream players on load, which pushed every one of them past that
-// cap and made them all fail with "an unknown error occurred". Players are now
-// mounted only while their tile is near the viewport and torn down when it
-// leaves, so at most one or two are ever live.
-// Mount/unmount one tile's player. Split out from the observer so the decision
-// and the DOM work can be exercised independently.
-function opSetCoverPlaying(el, playing) {
+// mode 'cover' fills a full-bleed tile (sized in vh/vw off the clip's aspect
+// ratio); mode 'strip' fills its box in the hero montage.
+function opSetPlaying(el, playing, mode) {
   var live = el.querySelector('iframe');
-  if (playing) {
-    if (live) return false;
-    var ar = parseFloat(el.getAttribute('data-ar')) || 16 / 9;
-    var uid = el.getAttribute('data-stream-uid');
-    var f = document.createElement('iframe');
-    f.src = opStreamEmbed(uid, opStreamThumb(uid, 720));
-    f.setAttribute('allow', 'autoplay; encrypted-media');
-    f.setAttribute('tabindex', '-1');
-    // Start transparent so the tile's own poster shows through while the player
-    // boots, then fade the video in. Without this the player's black background
-    // flashes over the poster the moment the iframe mounts.
-    f.style.cssText =
-      'border:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);' +
-      'width:' + (ar * 100).toFixed(4) + 'vh;height:' + (100 / ar).toFixed(4) + 'vw;' +
-      'min-width:100%;min-height:100%;pointer-events:none;' +
-      'opacity:0;transition:opacity .5s ease';
-    f.addEventListener('load', function () {
-      setTimeout(function () { f.style.opacity = '1'; }, 300);
-    });
-    el.appendChild(f);
+  if (!playing) {
+    if (!live) return false;
+    live.remove();
     return true;
   }
-  if (!live) return false;
-  live.remove();
+  if (live) return false;
+
+  var uid = el.getAttribute('data-stream-uid');
+  var f = document.createElement('iframe');
+  f.src = opStreamEmbed(uid, opStreamThumb(uid, mode === 'strip' ? 400 : 720));
+  f.setAttribute('allow', 'autoplay; encrypted-media');
+  f.setAttribute('tabindex', '-1');
+
+  // Start transparent so the element's own still shows through while the player
+  // boots, then fade the video in. Without this the player's black background
+  // flashes over the still the moment the iframe mounts.
+  var css = 'border:none;pointer-events:none;opacity:0;transition:opacity .5s ease;';
+  if (mode === 'strip') {
+    css += 'position:absolute;inset:0;width:100%;height:100%';
+  } else {
+    var ar = parseFloat(el.getAttribute('data-ar')) || 16 / 9;
+    css += 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);' +
+           'width:' + (ar * 100).toFixed(4) + 'vh;height:' + (100 / ar).toFixed(4) + 'vw;' +
+           'min-width:100%;min-height:100%';
+  }
+  f.style.cssText = css;
+  f.addEventListener('load', function () {
+    setTimeout(function () { f.style.opacity = '1'; }, 300);
+  });
+  el.appendChild(f);
   return true;
 }
 
-// True when the tile is close enough to the viewport to be worth playing.
+function opMaxCoverPlayers() { return window.innerWidth <= 768 ? 2 : 4; }
+function opMaxStripPlayers() { return window.innerWidth <= 768 ? 0 : 3; }
+
+// ── Tile covers ──────────────────────────────────────────────────────────────
+
 function opCoverInRange(el, margin) {
   var r = el.getBoundingClientRect();
   var pad = (margin === undefined ? 1 : margin) * window.innerHeight;
@@ -73,15 +83,9 @@ function opCoverInRange(el, margin) {
 }
 
 // Which way the reader is travelling, so the tile they are about to reach gets
-// the player rather than the one they just left.
+// a player rather than the one they just left.
 var opLastScrollY = 0;
 var opScrollDir = 1;
-
-// Hard ceiling on how many players may be live at once. Phones fail well
-// before this; the cap is what actually guarantees we never approach it again.
-function opMaxCoverPlayers() {
-  return window.innerWidth <= 768 ? 2 : 4;
-}
 
 function opSyncCoverVideos() {
   var y = window.pageYOffset || document.documentElement.scrollTop || 0;
@@ -102,37 +106,78 @@ function opSyncCoverVideos() {
     .map(function (x) { return x.el; });
 
   covers.forEach(function (el) {
-    opSetCoverPlaying(el, wanted.indexOf(el) !== -1);
+    opSetPlaying(el, wanted.indexOf(el) !== -1, 'cover');
   });
 }
 
-// Mobile browsers cap how many videos they will decode at once. The page used
-// to mount 25 Stream players on load, which pushed every one of them past that
-// cap and made them all fail with "an unknown error occurred". Players are now
-// mounted only while their tile is near the viewport and torn down when it
-// leaves, so at most one or two are ever live.
-//
-// IntersectionObserver does the work; a throttled scroll listener backs it up
-// so a tile can never sit frozen on its poster if the observer stays quiet.
-function opMountCoverVideos() {
-  var covers = document.querySelectorAll('.op-proj-cover-video');
-  if (!covers.length) return;
+// ── Hero strip ───────────────────────────────────────────────────────────────
+// The strip slides continuously under a CSS animation, so which of its items
+// are on screen changes without any scroll event. A light timer re-checks while
+// the hero is visible, and does nothing at all once it isn't.
+
+function opSyncStripVideos() {
+  var slots = [].slice.call(document.querySelectorAll('.op-strip-video'));
+  if (!slots.length) return;
+
+  var hero = document.querySelector('.op-hero');
+  var hr = hero && hero.getBoundingClientRect();
+  var heroVisible = !!hr && hr.bottom > 0 && hr.top < window.innerHeight;
+
+  var wanted = [];
+  if (heroVisible && !document.hidden) {
+    var mid = window.innerWidth / 2;
+    wanted = slots
+      .filter(function (el) {
+        var r = el.getBoundingClientRect();
+        return r.right > -80 && r.left < window.innerWidth + 80;
+      })
+      .map(function (el) {
+        var r = el.getBoundingClientRect();
+        return { el: el, dist: Math.abs((r.left + r.right) / 2 - mid) };
+      })
+      .sort(function (a, b) { return a.dist - b.dist; })
+      .slice(0, opMaxStripPlayers())
+      .map(function (x) { return x.el; });
+  }
+
+  slots.forEach(function (el) {
+    opSetPlaying(el, wanted.indexOf(el) !== -1, 'strip');
+  });
+}
+
+// ── Wiring ───────────────────────────────────────────────────────────────────
+
+var opPlayerLoopStarted = false;
+
+function opStartPlayerSync() {
+  opSyncCoverVideos();
+  opSyncStripVideos();
+  if (opPlayerLoopStarted) return;
+  opPlayerLoopStarted = true;
 
   if ('IntersectionObserver' in window) {
-    // Route through opSyncCoverVideos so the cap is enforced in one place.
     var io = new IntersectionObserver(opSyncCoverVideos, { rootMargin: '25% 0px' });
-    covers.forEach(function (c) { io.observe(c); });
+    document.querySelectorAll('.op-proj-cover-video').forEach(function (c) { io.observe(c); });
   }
 
   var ticking = false;
   function onScroll() {
     if (ticking) return;
     ticking = true;
-    window.requestAnimationFrame(function () { ticking = false; opSyncCoverVideos(); });
+    window.requestAnimationFrame(function () {
+      ticking = false;
+      opSyncCoverVideos();
+      opSyncStripVideos();
+    });
   }
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', onScroll);
-  opSyncCoverVideos();
+  document.addEventListener('visibilitychange', opSyncStripVideos);
+
+  // The strip moves on its own, so it needs a periodic check that scroll
+  // events cannot provide. Cheap: one rect read and an early return once the
+  // hero is off screen.
+  setInterval(opSyncStripVideos, 400);
 }
 
 function opGroupMedia(items) {
@@ -239,10 +284,9 @@ function opBuildHeroStrip(projects) {
       if (!stripPlaysVideo) {
         return '<img src="' + opStreamThumb(it.uid, 400) + '" alt="">';
       }
-      return '<div class="op-hero-strip-video" style="aspect-ratio:' + it.ar.toFixed(4) +
-               ';background:#141310 url(' + opStreamThumb(it.uid, 400) + ') center/cover">' +
-               '<iframe src="' + opStreamEmbed(it.uid, opStreamThumb(it.uid, 400)) + '" allow="autoplay; encrypted-media" tabindex="-1"></iframe>' +
-             '</div>';
+      return '<div class="op-hero-strip-video op-strip-video" data-stream-uid="' + it.uid + '"' +
+               ' style="aspect-ratio:' + it.ar.toFixed(4) +
+               ';background:#141310 url(' + opStreamThumb(it.uid, 400) + ') center/cover"></div>';
     }
     return '<img src="' + it.src + '" alt="">';
   }
@@ -286,8 +330,8 @@ function opRenderHome() {
   opLoadProjects().then(function(projects) {
     var total = projects.length;
     root.innerHTML = projects.map(function(p, i) { return opProjTile(p, i, total); }).join('');
-    opMountCoverVideos();
     opBuildHeroStrip(projects);
+    opStartPlayerSync();
     if (window.opUpdateDotGrids) window.opUpdateDotGrids();
   });
 }
