@@ -140,11 +140,25 @@ function opBuildHeroStrip(projects) {
   wrap.className = 'op-hero-strip-wrap';
   wrap.appendChild(strip);
 
-  var bg = media.querySelector('.op-hero-media-img');
-  if (bg) bg.style.backgroundImage = '';
   var vid = media.querySelector('.op-hero-video');
   if (vid) vid.remove();
   media.insertBefore(wrap, media.firstChild);
+
+  // Hold the static background photo underneath until the strip has something
+  // to show. The page now reveals before the strip's images have loaded, so
+  // clearing it immediately would flash an empty hero.
+  var bg = media.querySelector('.op-hero-media-img');
+  var firstImg = strip.querySelector('img');
+  function clearBg() { if (bg) bg.style.backgroundImage = ''; }
+  if (!firstImg || (firstImg.complete && firstImg.naturalWidth)) {
+    clearBg();
+  } else {
+    firstImg.addEventListener('load', clearBg, { once: true });
+    firstImg.addEventListener('error', clearBg, { once: true });
+    setTimeout(clearBg, 3000);
+  }
+
+  document.dispatchEvent(new Event('op-hero-ready'));
 }
 
 function opInjectMobileStyles(projects) {

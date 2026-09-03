@@ -231,7 +231,40 @@
     }, 500);
   }
 
-  window.addEventListener('load', function() {
-    (document.fonts ? document.fonts.ready : Promise.resolve()).then(reveal);
+  // Reveal as soon as the things the intro actually depends on are ready: the
+  // fonts, and the logo images it crossfades (it measures the hero logo's box,
+  // which is zero-width until that image loads). Everything else — photos,
+  // video players — keeps loading behind the revealed site.
+  //
+  // This used to wait for window.load, which fires only after every image and
+  // all ~25 video players finish. That was ~6s on a cold visit.
+
+  function imgReady(img) {
+    if (!img || (img.complete && img.naturalWidth)) return Promise.resolve();
+    return new Promise(function (res) {
+      img.addEventListener('load', res, { once: true });
+      img.addEventListener('error', res, { once: true });
+    });
+  }
+
+  var revealed = false;
+  function revealOnce() { if (revealed) return; revealed = true; reveal(); }
+
+  // render.js fires this once the hero strip is in the DOM. Capped so a slow
+  // projects.json fetch can't hold the page.
+  var heroReady = new Promise(function (res) {
+    document.addEventListener('op-hero-ready', res, { once: true });
+    setTimeout(res, 1500);
   });
+
+  Promise.all([
+    document.fonts ? document.fonts.ready : Promise.resolve(),
+    imgReady(document.getElementById('op-pre-blue')),
+    imgReady(document.getElementById('op-pre-white')),
+    imgReady(document.querySelector('.op-hero-logo')),
+    heroReady
+  ]).then(revealOnce);
+
+  // Hard cap — never hold the page longer than this, whatever is still in flight.
+  setTimeout(revealOnce, 2500);
 })();
