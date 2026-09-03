@@ -23,9 +23,10 @@ function opStreamThumb(uid, height) {
          (height ? '&height=' + height : '');
 }
 
-function opStreamEmbed(uid) {
+function opStreamEmbed(uid, poster) {
   return 'https://iframe.videodelivery.net/' + uid +
-         '?autoplay=true&muted=true&loop=true&controls=false&preload=auto&playsinline=true';
+         '?autoplay=true&muted=true&loop=true&controls=false&preload=auto&playsinline=true' +
+         (poster ? '&poster=' + encodeURIComponent(poster) : '');
 }
 
 // Mobile browsers cap how many videos they will decode at once. The page used
@@ -40,14 +41,22 @@ function opSetCoverPlaying(el, playing) {
   if (playing) {
     if (live) return false;
     var ar = parseFloat(el.getAttribute('data-ar')) || 16 / 9;
+    var uid = el.getAttribute('data-stream-uid');
     var f = document.createElement('iframe');
-    f.src = opStreamEmbed(el.getAttribute('data-stream-uid'));
+    f.src = opStreamEmbed(uid, opStreamThumb(uid, 720));
     f.setAttribute('allow', 'autoplay; encrypted-media');
     f.setAttribute('tabindex', '-1');
+    // Start transparent so the tile's own poster shows through while the player
+    // boots, then fade the video in. Without this the player's black background
+    // flashes over the poster the moment the iframe mounts.
     f.style.cssText =
       'border:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);' +
       'width:' + (ar * 100).toFixed(4) + 'vh;height:' + (100 / ar).toFixed(4) + 'vw;' +
-      'min-width:100%;min-height:100%;pointer-events:none';
+      'min-width:100%;min-height:100%;pointer-events:none;' +
+      'opacity:0;transition:opacity .5s ease';
+    f.addEventListener('load', function () {
+      setTimeout(function () { f.style.opacity = '1'; }, 300);
+    });
     el.appendChild(f);
     return true;
   }
@@ -59,9 +68,14 @@ function opSetCoverPlaying(el, playing) {
 // True when the tile is close enough to the viewport to be worth playing.
 function opCoverInRange(el, margin) {
   var r = el.getBoundingClientRect();
-  var pad = (margin === undefined ? 0.25 : margin) * window.innerHeight;
+  var pad = (margin === undefined ? 1 : margin) * window.innerHeight;
   return r.top < window.innerHeight + pad && r.bottom > -pad;
 }
+
+// Which way the reader is travelling, so the tile they are about to reach gets
+// the player rather than the one they just left.
+var opLastScrollY = 0;
+var opScrollDir = 1;
 
 // Hard ceiling on how many players may be live at once. Phones fail well
 // before this; the cap is what actually guarantees we never approach it again.
@@ -70,13 +84,18 @@ function opMaxCoverPlayers() {
 }
 
 function opSyncCoverVideos() {
+  var y = window.pageYOffset || document.documentElement.scrollTop || 0;
+  if (y !== opLastScrollY) { opScrollDir = y > opLastScrollY ? 1 : -1; opLastScrollY = y; }
+
   var covers = [].slice.call(document.querySelectorAll('.op-proj-cover-video'));
-  var mid = window.innerHeight / 2;
+  // Aim half a viewport ahead of centre, so the next tile wins a slot before it
+  // scrolls into view and has time to start playing off-screen.
+  var focus = window.innerHeight * (0.5 + opScrollDir * 0.5);
   var wanted = covers
     .filter(function (el) { return opCoverInRange(el); })
     .map(function (el) {
       var r = el.getBoundingClientRect();
-      return { el: el, dist: Math.abs((r.top + r.bottom) / 2 - mid) };
+      return { el: el, dist: Math.abs((r.top + r.bottom) / 2 - focus) };
     })
     .sort(function (a, b) { return a.dist - b.dist; })
     .slice(0, opMaxCoverPlayers())
@@ -220,8 +239,9 @@ function opBuildHeroStrip(projects) {
       if (!stripPlaysVideo) {
         return '<img src="' + opStreamThumb(it.uid, 400) + '" alt="">';
       }
-      return '<div class="op-hero-strip-video" style="aspect-ratio:' + it.ar.toFixed(4) + '">' +
-               '<iframe src="' + opStreamEmbed(it.uid) + '" allow="autoplay; encrypted-media" tabindex="-1"></iframe>' +
+      return '<div class="op-hero-strip-video" style="aspect-ratio:' + it.ar.toFixed(4) +
+               ';background:#141310 url(' + opStreamThumb(it.uid, 400) + ') center/cover">' +
+               '<iframe src="' + opStreamEmbed(it.uid, opStreamThumb(it.uid, 400)) + '" allow="autoplay; encrypted-media" tabindex="-1"></iframe>' +
              '</div>';
     }
     return '<img src="' + it.src + '" alt="">';
