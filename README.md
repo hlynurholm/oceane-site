@@ -15,8 +15,8 @@ Plain static site: `index.html`, `styles.css`, `script.js`, `assets/`. No build 
 5. Every future push to the repo's main branch auto-redeploys.
 
 ## Connect your real domain (whenever you're ready)
-1. In the Pages project → **Custom domains** → add `oceaneproductions.com` (or whatever it is).
-2. If the domain's DNS is already on Cloudflare, it's a one-click add. If it's still on Squarespace, you'll transfer/point DNS to Cloudflare first — Cloudflare's domain transfer wizard walks you through it; no rush, the `*.pages.dev` URL works fine to preview and share in the meantime.
+1. In the Pages project → **Custom domains** → add `oceane.is`.
+2. Done — `oceane.is` is live on Cloudflare, with `oceane-site.pages.dev` still working as a preview URL.
 
 ## Editing content for now
 Every project lives in `data/projects.json` — open it in any text editor:

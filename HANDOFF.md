@@ -9,7 +9,7 @@ Static one-page portfolio site for Oceane Productions (small-to-mid-budget comme
 - Not yet pushed to GitHub or deployed.
 - Each project in `projects.json` has a `media` array (`{type:"image", src:"file.jpg"}` or `{type:"video", poster:"file.jpg"}`, in any order/combination) — the detail page groups consecutive images into a gallery grid and renders videos as full-width poster blocks, so a project can have just photos, just a video, or both without any template changes.
 - 4 placeholder photos are reused across the 7 media slots (hero + 6 projects) in `assets/photos/`; videos are only mocked as poster images with a play-button overlay (no real video files/player wired in yet).
-- The "say hi" / "start a project" buttons link to `mailto:hello@oceaneproductions.com` — a stand-in, not a real form.
+- The contact page links to `mailto:hlynur@oceane.is` — still a mailto, not a real form.
 
 ## The editing tool (next thing to build)
 The plan is a small custom tool (built here in Claude Code) that lets the client create/edit/delete projects without touching code — reading and writing `data/projects.json` (and dropping files into `assets/photos/` or wherever video ends up living) is the whole contract. Concretely it needs to:
