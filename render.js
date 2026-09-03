@@ -16,6 +16,106 @@ function opFs(proj, field) {
   return parts.length ? ' style="' + parts.join(';') + '"' : '';
 }
 
+// Cloudflare Stream serves a still for any video, so we can show a poster
+// wherever a live player isn't worth its cost.
+function opStreamThumb(uid, height) {
+  return 'https://videodelivery.net/' + uid + '/thumbnails/thumbnail.jpg?time=1s' +
+         (height ? '&height=' + height : '');
+}
+
+function opStreamEmbed(uid) {
+  return 'https://iframe.videodelivery.net/' + uid +
+         '?autoplay=true&muted=true&loop=true&controls=false&preload=auto&playsinline=true';
+}
+
+// Mobile browsers cap how many videos they will decode at once. The page used
+// to mount 25 Stream players on load, which pushed every one of them past that
+// cap and made them all fail with "an unknown error occurred". Players are now
+// mounted only while their tile is near the viewport and torn down when it
+// leaves, so at most one or two are ever live.
+// Mount/unmount one tile's player. Split out from the observer so the decision
+// and the DOM work can be exercised independently.
+function opSetCoverPlaying(el, playing) {
+  var live = el.querySelector('iframe');
+  if (playing) {
+    if (live) return false;
+    var ar = parseFloat(el.getAttribute('data-ar')) || 16 / 9;
+    var f = document.createElement('iframe');
+    f.src = opStreamEmbed(el.getAttribute('data-stream-uid'));
+    f.setAttribute('allow', 'autoplay; encrypted-media');
+    f.setAttribute('tabindex', '-1');
+    f.style.cssText =
+      'border:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);' +
+      'width:' + (ar * 100).toFixed(4) + 'vh;height:' + (100 / ar).toFixed(4) + 'vw;' +
+      'min-width:100%;min-height:100%;pointer-events:none';
+    el.appendChild(f);
+    return true;
+  }
+  if (!live) return false;
+  live.remove();
+  return true;
+}
+
+// True when the tile is close enough to the viewport to be worth playing.
+function opCoverInRange(el, margin) {
+  var r = el.getBoundingClientRect();
+  var pad = (margin === undefined ? 0.25 : margin) * window.innerHeight;
+  return r.top < window.innerHeight + pad && r.bottom > -pad;
+}
+
+// Hard ceiling on how many players may be live at once. Phones fail well
+// before this; the cap is what actually guarantees we never approach it again.
+function opMaxCoverPlayers() {
+  return window.innerWidth <= 768 ? 2 : 4;
+}
+
+function opSyncCoverVideos() {
+  var covers = [].slice.call(document.querySelectorAll('.op-proj-cover-video'));
+  var mid = window.innerHeight / 2;
+  var wanted = covers
+    .filter(function (el) { return opCoverInRange(el); })
+    .map(function (el) {
+      var r = el.getBoundingClientRect();
+      return { el: el, dist: Math.abs((r.top + r.bottom) / 2 - mid) };
+    })
+    .sort(function (a, b) { return a.dist - b.dist; })
+    .slice(0, opMaxCoverPlayers())
+    .map(function (x) { return x.el; });
+
+  covers.forEach(function (el) {
+    opSetCoverPlaying(el, wanted.indexOf(el) !== -1);
+  });
+}
+
+// Mobile browsers cap how many videos they will decode at once. The page used
+// to mount 25 Stream players on load, which pushed every one of them past that
+// cap and made them all fail with "an unknown error occurred". Players are now
+// mounted only while their tile is near the viewport and torn down when it
+// leaves, so at most one or two are ever live.
+//
+// IntersectionObserver does the work; a throttled scroll listener backs it up
+// so a tile can never sit frozen on its poster if the observer stays quiet.
+function opMountCoverVideos() {
+  var covers = document.querySelectorAll('.op-proj-cover-video');
+  if (!covers.length) return;
+
+  if ('IntersectionObserver' in window) {
+    // Route through opSyncCoverVideos so the cap is enforced in one place.
+    var io = new IntersectionObserver(opSyncCoverVideos, { rootMargin: '25% 0px' });
+    covers.forEach(function (c) { io.observe(c); });
+  }
+
+  var ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(function () { ticking = false; opSyncCoverVideos(); });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  opSyncCoverVideos();
+}
+
 function opGroupMedia(items) {
   var groups = [], buffer = [], bufferIdxs = [];
   items.forEach(function(item, i) {
@@ -48,16 +148,11 @@ function opProjTile(p, index, total) {
 
   var mediaEl;
   if (p.coverStreamUid) {
-    var src = 'https://iframe.videodelivery.net/' + p.coverStreamUid +
-              '?autoplay=true&muted=true&loop=true&controls=false&preload=auto&playsinline=true';
-    var ar  = (p.coverWidth && p.coverHeight) ? p.coverWidth / p.coverHeight : 16 / 9;
-    var wVh = (ar * 100).toFixed(4) + 'vh';
-    var hVw = (100 / ar).toFixed(4) + 'vw';
-    var iStyle = 'border:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);' +
-                 'width:' + wVh + ';height:' + hVw + ';min-width:100%;min-height:100%;pointer-events:none';
-    mediaEl = '<div class="op-proj-media" style="background:#141310">' +
-                '<iframe src="' + src + '" allow="autoplay; encrypted-media" tabindex="-1" style="' + iStyle + '"></iframe>' +
-              '</div>';
+    var ar = (p.coverWidth && p.coverHeight) ? p.coverWidth / p.coverHeight : 16 / 9;
+    mediaEl = '<div class="op-proj-media op-proj-cover-video"' +
+                ' data-stream-uid="' + p.coverStreamUid + '"' +
+                ' data-ar="' + ar.toFixed(4) + '"' +
+                ' style="background-color:#141310;background-image:url(' + opStreamThumb(p.coverStreamUid, 720) + ')"></div>';
   } else {
     var cover = p.media && p.media.length
       ? (p.media[0].type === 'video' ? p.media[0].poster : p.media[0].src)
@@ -115,12 +210,18 @@ function opBuildHeroStrip(projects) {
   var totalAR = items.reduce(function(s, it) { return s + it.ar; }, 0);
   var duration = Math.max(40, Math.round(totalAR * 6));
 
+  // The strip is duplicated for a seamless loop, so every video in it costs two
+  // players. On phones that budget is better spent on the tile covers, and the
+  // strip is blurred anyway — use Stream's stills there instead.
+  var stripPlaysVideo = window.matchMedia('(min-width: 769px)').matches;
+
   function makeItem(it) {
     if (it.type === 'video') {
-      var src = 'https://iframe.videodelivery.net/' + it.uid +
-                '?autoplay=true&muted=true&loop=true&controls=false&preload=auto&playsinline=true';
+      if (!stripPlaysVideo) {
+        return '<img src="' + opStreamThumb(it.uid, 400) + '" alt="">';
+      }
       return '<div class="op-hero-strip-video" style="aspect-ratio:' + it.ar.toFixed(4) + '">' +
-               '<iframe src="' + src + '" allow="autoplay; encrypted-media" tabindex="-1"></iframe>' +
+               '<iframe src="' + opStreamEmbed(it.uid) + '" allow="autoplay; encrypted-media" tabindex="-1"></iframe>' +
              '</div>';
     }
     return '<img src="' + it.src + '" alt="">';
@@ -165,6 +266,7 @@ function opRenderHome() {
   opLoadProjects().then(function(projects) {
     var total = projects.length;
     root.innerHTML = projects.map(function(p, i) { return opProjTile(p, i, total); }).join('');
+    opMountCoverVideos();
     opBuildHeroStrip(projects);
     if (window.opUpdateDotGrids) window.opUpdateDotGrids();
   });
