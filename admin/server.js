@@ -3,7 +3,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
-const { execSync } = require('child_process');
+const { execSync, execFileSync } = require('child_process');
 const cheerio = require('cheerio');
 const sharp = require('sharp');
 
@@ -214,14 +214,37 @@ app.get('/api/snapshots', (req, res) => {
   res.json(list);
 });
 
-function copyDir(src, dest, skip) {
+// Plain byte-for-byte copy. Fallback for when cloning isn't available.
+function copyDirPlain(src, dest, skip) {
   if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
   for (const entry of fs.readdirSync(src)) {
     if (skip.includes(entry)) continue;
     const s = path.join(src, entry);
     const d = path.join(dest, entry);
-    if (fs.statSync(s).isDirectory()) copyDir(s, d, []);
+    if (fs.statSync(s).isDirectory()) copyDirPlain(s, d, []);
     else fs.copyFileSync(s, d);
+  }
+}
+
+/*
+  Snapshots the tree using APFS copy-on-write clones, so a snapshot of the
+  42MB assets/ folder costs ~0 bytes on disk instead of another 42MB. Blocks
+  are shared until something writes, and then only the changed blocks diverge —
+  so unlike a hard link, re-uploading a photo can never alter an old snapshot.
+
+  This has to shell out to `cp -c`: Node's fs.constants.COPYFILE_FICLONE is a
+  no-op on macOS (libuv implements it only via Linux's ioctl(FICLONE), not
+  macOS's clonefile(2)), so it silently performs a full copy. Falls back to a
+  plain recursive copy if `cp -c` is unavailable or the filesystem isn't APFS.
+*/
+function copyDir(src, dest, skip) {
+  if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
+  const entries = fs.readdirSync(src).filter(e => !skip.includes(e));
+  if (!entries.length) return;
+  try {
+    execFileSync('cp', ['-c', '-R', ...entries.map(e => path.join(src, e)), dest], { stdio: 'pipe' });
+  } catch {
+    copyDirPlain(src, dest, skip);
   }
 }
 
