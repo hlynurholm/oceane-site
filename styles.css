@@ -12,7 +12,6 @@ a{text-decoration:none}
 .op-hero-media{position:absolute;top:0;left:0;right:0;height:50%;overflow:hidden;background:#3F7C98 url(assets/hero-sky.jpg) center/cover no-repeat}
 #op-hero-sky{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;transition:opacity .6s ease}
 #op-hero-sky.op-live{opacity:1}
-.op-hero-vignette{position:absolute;top:0;left:0;right:0;height:50%;background:radial-gradient(ellipse at 50% 40%,rgba(11,58,118,.55) 0%,transparent 45%);pointer-events:none}
 .op-hero-scan{position:absolute;top:0;left:0;right:0;height:50%;background:repeating-linear-gradient(0deg,rgba(255,252,249,.05) 0px,rgba(255,252,249,.05) 1px,transparent 1px,transparent 4px);pointer-events:none;mix-blend-mode:overlay}
 @keyframes opPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
 .op-hero-spec{position:absolute;top:36px;right:clamp(20px,4vw,56px);font-size:12px;letter-spacing:.06em;color:rgba(255,252,249,.65)}
@@ -101,7 +100,6 @@ a{text-decoration:none}
 @media (max-width:640px){.op-d-client{font-size:36px}}
 @media(max-width:640px){
   .op-hero-logo{width:75vw;height:auto}
-  .op-hero-vignette{background:radial-gradient(ellipse 160% 40% at 50% 40%,rgba(11,58,118,.55) 0%,transparent 70%)}
 }
 #op-preloader{position:fixed;inset:0;z-index:999;background:#fffcf9}
 #op-pre-white,#op-pre-blue{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);height:clamp(64px,12vh,180px)}
