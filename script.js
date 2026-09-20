@@ -106,12 +106,6 @@
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = '#fffcf9';
 
-    var hero = document.querySelector('.op-hero');
-    if (hero) {
-      var r = hero.getBoundingClientRect();
-      drawDots(0, r.top, canvas.width, r.height / 2);
-    }
-
     document.querySelectorAll('.op-proj').forEach(function(el, i) {
       var r = el.getBoundingClientRect();
       var x = (i % 2 === 1) ? canvas.width / 2 : 0;
