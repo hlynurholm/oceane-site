@@ -34,9 +34,9 @@ function opStreamEmbed(uid, poster) {
          (poster ? '&poster=' + encodeURIComponent(poster) : '');
 }
 
-// mode 'cover' fills a full-bleed tile (sized in vh/vw off the clip's aspect
-// ratio); mode 'strip' fills its box in the hero montage.
-function opSetPlaying(el, playing, mode) {
+// Mounts or removes the player in a full-bleed tile (sized in vh/vw off the
+// clip's aspect ratio so it always covers).
+function opSetPlaying(el, playing) {
   var live = el.querySelector('iframe');
   if (!playing) {
     if (!live) return false;
@@ -47,23 +47,19 @@ function opSetPlaying(el, playing, mode) {
 
   var uid = el.getAttribute('data-stream-uid');
   var f = document.createElement('iframe');
-  f.src = opStreamEmbed(uid, opStreamThumb(uid, mode === 'strip' ? 400 : 720));
+  f.src = opStreamEmbed(uid, opStreamThumb(uid, 720));
   f.setAttribute('allow', 'autoplay; encrypted-media');
   f.setAttribute('tabindex', '-1');
 
   // Start transparent so the element's own still shows through while the player
   // boots, then fade the video in. Without this the player's black background
   // flashes over the still the moment the iframe mounts.
-  var css = 'border:none;pointer-events:none;opacity:0;transition:opacity .5s ease;';
-  if (mode === 'strip') {
-    css += 'position:absolute;inset:0;width:100%;height:100%';
-  } else {
-    var ar = parseFloat(el.getAttribute('data-ar')) || 16 / 9;
-    css += 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);' +
-           'width:' + (ar * 100).toFixed(4) + 'vh;height:' + (100 / ar).toFixed(4) + 'vw;' +
-           'min-width:100%;min-height:100%';
-  }
-  f.style.cssText = css;
+  var ar = parseFloat(el.getAttribute('data-ar')) || 16 / 9;
+  f.style.cssText =
+    'border:none;pointer-events:none;opacity:0;transition:opacity .5s ease;' +
+    'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);' +
+    'width:' + (ar * 100).toFixed(4) + 'vh;height:' + (100 / ar).toFixed(4) + 'vw;' +
+    'min-width:100%;min-height:100%';
   f.addEventListener('load', function () {
     setTimeout(function () { f.style.opacity = '1'; }, 300);
   });
@@ -72,7 +68,6 @@ function opSetPlaying(el, playing, mode) {
 }
 
 function opMaxCoverPlayers() { return window.innerWidth <= 768 ? 2 : 4; }
-function opMaxStripPlayers() { return window.innerWidth <= 768 ? 0 : 3; }
 
 // ── Tile covers ──────────────────────────────────────────────────────────────
 
@@ -106,42 +101,7 @@ function opSyncCoverVideos() {
     .map(function (x) { return x.el; });
 
   covers.forEach(function (el) {
-    opSetPlaying(el, wanted.indexOf(el) !== -1, 'cover');
-  });
-}
-
-// ── Hero strip ───────────────────────────────────────────────────────────────
-// The strip slides continuously under a CSS animation, so which of its items
-// are on screen changes without any scroll event. A light timer re-checks while
-// the hero is visible, and does nothing at all once it isn't.
-
-function opSyncStripVideos() {
-  var slots = [].slice.call(document.querySelectorAll('.op-strip-video'));
-  if (!slots.length) return;
-
-  var hero = document.querySelector('.op-hero');
-  var hr = hero && hero.getBoundingClientRect();
-  var heroVisible = !!hr && hr.bottom > 0 && hr.top < window.innerHeight;
-
-  var wanted = [];
-  if (heroVisible && !document.hidden) {
-    var mid = window.innerWidth / 2;
-    wanted = slots
-      .filter(function (el) {
-        var r = el.getBoundingClientRect();
-        return r.right > -80 && r.left < window.innerWidth + 80;
-      })
-      .map(function (el) {
-        var r = el.getBoundingClientRect();
-        return { el: el, dist: Math.abs((r.left + r.right) / 2 - mid) };
-      })
-      .sort(function (a, b) { return a.dist - b.dist; })
-      .slice(0, opMaxStripPlayers())
-      .map(function (x) { return x.el; });
-  }
-
-  slots.forEach(function (el) {
-    opSetPlaying(el, wanted.indexOf(el) !== -1, 'strip');
+    opSetPlaying(el, wanted.indexOf(el) !== -1);
   });
 }
 
@@ -151,7 +111,6 @@ var opPlayerLoopStarted = false;
 
 function opStartPlayerSync() {
   opSyncCoverVideos();
-  opSyncStripVideos();
   if (opPlayerLoopStarted) return;
   opPlayerLoopStarted = true;
 
@@ -167,17 +126,10 @@ function opStartPlayerSync() {
     window.requestAnimationFrame(function () {
       ticking = false;
       opSyncCoverVideos();
-      opSyncStripVideos();
     });
   }
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', onScroll);
-  document.addEventListener('visibilitychange', opSyncStripVideos);
-
-  // The strip moves on its own, so it needs a periodic check that scroll
-  // events cannot provide. Cheap: one rect read and an early return once the
-  // hero is off screen.
-  setInterval(opSyncStripVideos, 400);
 }
 
 function opGroupMedia(items) {
@@ -244,93 +196,12 @@ function opProjTile(p, index, total) {
     '</a>';
 }
 
-function opBuildHeroStrip(projects) {
-  var media = document.querySelector('.op-hero-media');
-  if (!media) return;
-
-  // Collect up to 5 items per project: real video iframes + images
-  var items = [];
-  projects.forEach(function(proj) {
-    var count = 0;
-    (proj.media || []).forEach(function(m) {
-      if (count >= 5) return;
-      if (m.streamUid) {
-        items.push({ type: 'video', uid: m.streamUid, ar: (m.width && m.height) ? m.width / m.height : 1.778 });
-        count++;
-      } else if (m.type === 'image' && m.src) {
-        items.push({ type: 'image', src: 'assets/photos/' + m.src, ar: (m.width && m.height) ? m.width / m.height : 1.5 });
-        count++;
-      }
-    });
-  });
-  if (!items.length) return;
-
-  // Fresh random shuffle every page load
-  for (var i = items.length - 1; i > 0; i--) {
-    var j = Math.floor(Math.random() * (i + 1));
-    var t = items[i]; items[i] = items[j]; items[j] = t;
-  }
-
-  var totalAR = items.reduce(function(s, it) { return s + it.ar; }, 0);
-  var duration = Math.max(40, Math.round(totalAR * 6));
-
-  // The strip is duplicated for a seamless loop, so every video in it costs two
-  // players. On phones that budget is better spent on the tile covers, and the
-  // strip is blurred anyway — use Stream's stills there instead.
-  var stripPlaysVideo = window.matchMedia('(min-width: 769px)').matches;
-
-  function makeItem(it) {
-    if (it.type === 'video') {
-      if (!stripPlaysVideo) {
-        return '<img src="' + opStreamThumb(it.uid, 400) + '" alt="">';
-      }
-      return '<div class="op-hero-strip-video op-strip-video" data-stream-uid="' + it.uid + '"' +
-               ' style="aspect-ratio:' + it.ar.toFixed(4) +
-               ';background:#141310 url(' + opStreamThumb(it.uid, 400) + ') center/cover"></div>';
-    }
-    return '<img src="' + it.src + '" alt="">';
-  }
-
-  var inner = items.map(makeItem).join('');
-
-  // Duplicate for seamless loop; translateX(-50%) = one full copy width
-  var strip = document.createElement('div');
-  strip.className = 'op-hero-strip';
-  strip.style.animationDuration = duration + 's';
-  strip.innerHTML = inner + inner;
-
-  var wrap = document.createElement('div');
-  wrap.className = 'op-hero-strip-wrap';
-  wrap.appendChild(strip);
-
-  var vid = media.querySelector('.op-hero-video');
-  if (vid) vid.remove();
-  media.insertBefore(wrap, media.firstChild);
-
-  // Hold the static background photo underneath until the strip has something
-  // to show. The page now reveals before the strip's images have loaded, so
-  // clearing it immediately would flash an empty hero.
-  var bg = media.querySelector('.op-hero-media-img');
-  var firstImg = strip.querySelector('img');
-  function clearBg() { if (bg) bg.style.backgroundImage = ''; }
-  if (!firstImg || (firstImg.complete && firstImg.naturalWidth)) {
-    clearBg();
-  } else {
-    firstImg.addEventListener('load', clearBg, { once: true });
-    firstImg.addEventListener('error', clearBg, { once: true });
-    setTimeout(clearBg, 3000);
-  }
-
-  document.dispatchEvent(new Event('op-hero-ready'));
-}
-
 function opRenderHome() {
   var root = document.getElementById('op-projects');
   if (!root) return;
   opLoadProjects().then(function(projects) {
     var total = projects.length;
     root.innerHTML = projects.map(function(p, i) { return opProjTile(p, i, total); }).join('');
-    opBuildHeroStrip(projects);
     opStartPlayerSync();
     if (window.opUpdateDotGrids) window.opUpdateDotGrids();
   });

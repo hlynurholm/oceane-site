@@ -268,3 +268,106 @@
   // Hard cap — never hold the page longer than this, whatever is still in flight.
   setTimeout(revealOnce, 2500);
 })();
+
+// Hero sky: the still image in assets/hero-sky.jpg, bent by two slow noise
+// fields so the clouds drift and fold like smoke, with film grain that is
+// regenerated every grain frame. The same image is the CSS background of
+// .op-hero-media, and this canvas stays transparent until it has really drawn,
+// so every failure (no WebGL, shader won't start, GPU lost) leaves the still.
+(function(){
+  var canvas = document.getElementById('op-hero-sky');
+  if (!canvas) return;
+
+  var SPEED = 1, AMOUNT = 0.12, GRAIN = 0.10, GRAIN_FPS = 24, CROP = 0.5;
+
+  var FRAG = [
+    'precision highp float;',
+    'uniform sampler2D IMG; uniform vec2 R; uniform float T, W, G, F, A, D;',
+    'float hash(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * .1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }',
+    'float noise(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f);',
+    '  return mix(mix(hash(i), hash(i + vec2(1., 0.)), f.x), mix(hash(i + vec2(0., 1.)), hash(i + vec2(1., 1.)), f.x), f.y); }',
+    'float fbm(vec2 p){ return .67 * noise(p) + .33 * noise(p * 2.1 + 7.3); }',
+    'void main(){',
+    '  vec2 px = vec2(gl_FragCoord.x, R.y - gl_FragCoord.y);',
+    '  float sc = max(R.x / 2048., R.y / 1506.);',                                  // cover-fit, like the CSS background
+    '  vec2 uv = (vec2((2048. - R.x / sc) * .5, (1506. - R.y / sc) * A) + px / sc) / vec2(2048., 1506.);',
+    '  vec2 q = uv * vec2(1.36, 1.) * 2.2;',
+    '  vec2 bend = vec2(fbm(q + vec2(T * .030, T * .017)), fbm(q + vec2(5.2 - T * .021, 1.3 + T * .026))) - .5;',
+    '  uv = (uv - .5) * (1. - W * .7) + .5 + W * bend;',                             // slight zoom keeps bent lookups on the image
+    '  vec3 col = texture2D(IMG, uv).rgb;',
+    '  float g = hash(floor(px / D) + F * vec2(17., 59.));',                         // one grain cell per CSS pixel
+    '  vec3 ov = mix(2. * col * g, 1. - 2. * (1. - col) * (1. - g), step(.5, col));', // overlay blend
+    '  gl_FragColor = vec4(mix(col, ov, G), 1.);',
+    '}'
+  ].join('\n');
+
+  function heroReady() { document.dispatchEvent(new Event('op-hero-ready')); }   // the preloader waits on this
+
+  var img = new Image();
+  img.onerror = heroReady;
+  img.onload = function () { heroReady(); try { start(); } catch (e) {} };
+  img.src = 'assets/hero-sky.jpg';
+
+  function start() {
+    var gl = canvas.getContext('webgl', { antialias: false, alpha: false });
+    if (!gl) return;
+    function sh(type, src) {
+      var s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+      return s;
+    }
+    var prog = gl.createProgram();
+    gl.attachShader(prog, sh(gl.VERTEX_SHADER, 'attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}'));
+    gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FRAG));
+    gl.linkProgram(prog); gl.useProgram(prog);
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+    var U = {}; ['R','T','W','G','F','A','D'].forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
+
+    gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img);
+    // Not a power-of-two image, so WebGL1 needs clamping and no mipmaps.
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
+    var dpr = 1, clock = 0, prev = 0, last = 0, lost = false;
+    function draw(now) {
+      gl.uniform2f(U.R, canvas.width, canvas.height);
+      gl.uniform1f(U.T, clock);
+      gl.uniform1f(U.W, AMOUNT);
+      gl.uniform1f(U.G, GRAIN);
+      gl.uniform1f(U.F, Math.floor(now / 1000 * GRAIN_FPS) % 1000);
+      gl.uniform1f(U.A, CROP);
+      gl.uniform1f(U.D, dpr);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
+    function fit() {
+      if (lost) return;
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = canvas.clientWidth * dpr; canvas.height = canvas.clientHeight * dpr;
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      draw(performance.now());
+    }
+    // ponytail: capped at 30fps — the drift is slow and the grain is 24fps, so
+    // 60 would only burn battery. Raise the 33 if it ever looks steppy.
+    function loop(now) {
+      if (lost) return;
+      if (now - last >= 33) {
+        clock += (prev ? Math.min(now - prev, 100) / 1000 : 0) * SPEED;
+        prev = last = now;
+        if (canvas.getBoundingClientRect().bottom > 0) draw(now);   // nothing to paint once scrolled past
+      }
+      requestAnimationFrame(loop);   // rAF stops by itself in background tabs
+    }
+    // ponytail: a lost GPU context falls back to the still for the rest of the
+    // visit. Rebuild on 'webglcontextrestored' if that ever proves common.
+    canvas.addEventListener('webglcontextlost', function () { lost = true; canvas.classList.remove('op-live'); });
+    window.addEventListener('resize', fit);
+
+    fit();
+    canvas.classList.add('op-live');
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) requestAnimationFrame(loop);
+  }
+})();
