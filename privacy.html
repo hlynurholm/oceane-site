@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=DM+Serif+Display:ital@0;1&display=swap">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/favicon-180.png">
+<link rel="stylesheet" href="styles.css">
+<title>Oceane Productions — privacy</title>
+<meta name="description" content="What oceane.is collects about visitors: almost nothing, and exactly what.">
+<style>
+.op-contact{min-height:100vh;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:clamp(96px,14vh,140px) clamp(20px,4vw,56px) clamp(40px,8vh,80px);background:#141310;position:relative;overflow:hidden}
+.op-contact-tag{position:relative;z-index:6;display:flex;align-items:center;gap:10px;font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,252,249,.55);margin-bottom:24px}
+.op-contact-dot{width:8px;height:8px;border-radius:50%;background:#89a7bb;display:inline-block;animation:opPulse 1.6s ease-in-out infinite}
+.op-contact h1{position:relative;z-index:6;font-family:'DM Serif Display',serif;font-weight:400;font-size:clamp(36px,5vw,80px);line-height:1.05;color:#fffcf9;margin:0 0 40px;max-width:820px}
+.op-contact-body{position:relative;z-index:6;max-width:580px;display:flex;flex-direction:column;gap:22px;margin-bottom:52px}
+.op-contact-body p{font-size:clamp(15px,1.15vw,18px);line-height:1.7;color:rgba(255,252,249,.65);margin:0}
+.op-contact-body a{color:#82abcc}
+.op-contact-back{position:relative;z-index:6;display:inline-flex;align-items:center;gap:8px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,252,249,.45);transition:color .2s}
+.op-contact-back:hover{color:#fffcf9}
+</style>
+</head>
+<body>
+
+<header class="op-header" id="op-header">
+  <a href="index.html"><img src="assets/logo-offwhite.png" alt="Oceane Productions"></a>
+  <div class="op-header-right">
+    <button id="op-lang-toggle" class="op-lang-btn">IS</button>
+    <div class="op-header-nav">
+      <a class="op-nav-link" href="index.html" data-i18n="nav_home">home</a>
+      <a class="op-nav-link" href="about.html" data-i18n="nav_about">about</a>
+      <a class="op-nav-link" href="contact.html" data-i18n="nav_contact">contact</a>
+    </div>
+  </div>
+</header>
+
+<main class="op-contact">
+  <div class="op-contact-tag"><span class="op-contact-dot"></span><span data-i18n="privacy_tag">privacy</span></div>
+  <h1 data-i18n="privacy_h1">What this site collects.</h1>
+  <div class="op-contact-body">
+    <p data-i18n="privacy_p1">Almost nothing. There are no analytics, no advertising trackers, and no cookies set by this site.</p>
+    <p data-i18n="privacy_p2">On your first visit, your IP address is sent to ipapi.co to guess your country, so the site can open in Icelandic for visitors in Iceland. The result is saved in your browser as a language preference. Nothing else is stored.</p>
+    <p data-i18n="privacy_p3">The site is hosted on Cloudflare and videos are streamed through Cloudflare Stream. Cloudflare keeps standard server logs, including IP addresses, for security. See the Cloudflare privacy policy for details.</p>
+    <p data-i18n="privacy_p4">If you email hlynur@oceane.is, your message is handled like any other email and is not added to any list.</p>
+  </div>
+  <a class="op-contact-back" href="index.html" data-i18n="privacy_back">← back to work</a>
+</main>
+
+<script src="script.js"></script>
+<script src="i18n.js"></script>
+</body>
+</html>
