@@ -1,7 +1,7 @@
 {
   "home": {
     "hero_h1_is": "Fagleg framleiðsla,<br>á einfaldan hátt.<div class=\"op-text-width-handle\" contenteditable=\"false\"><span class=\"op-text-width-tip\"></span></div>",
-    "hero_sub_is": "Skilvirk framleiðsla fyrir vörumerki sem vilja niðurstöður, frá upphafi til afhendingar.<div class=\"op-text-width-handle\" contenteditable=\"false\"><span class=\"op-text-width-tip\"></span></div>",
+    "hero_sub_is": "Auglýsingar, heimildarmyndir og efni fyrir samfélagsmiðla. Lítið teymi, raunhæfar tímaáætlanir og einn tengiliður frá fyrsta símtali til afhendingar. Með aðsetur á Íslandi, vinnum um allan heim.",
     "footer_h2_is": "Ertu með tökur í uppsiglingu?",
     "footer_note_is": "Fjárhagsáætlanir eru litlar. Egóið líka."
   },
@@ -24,8 +24,8 @@
     "p2_is": "Oceane sér um framleiðslu á hreyfiefni og ljósmyndum frá byrjun til enda, allt frá auglýsingaherferðum og heimildamyndum í samfélagsmiðlaefni. Við viljum vinna með vörumerkjum og markaðsteymum sem vilja vinna hratt og fá alvöru niðurstöður.",
     "p3": "Got a project coming up? Get in touch below.",
     "p3_is": "Ert þú með verkefni í uppsiglingu? Heyrðu endilega í okkur hér fyrir neðan.",
-    "cta": "get in touch",
-    "cta_is": "hafa samband",
+    "cta": "Tell me about your shoot",
+    "cta_is": "Segðu mér frá tökunum",
     "back": "← back to work",
     "back_is": "← til baka"
   }
